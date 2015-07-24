@@ -19,6 +19,7 @@ public class ActionListenerAbout implements ActionListener {
 		
 		jDialogAbout.add(new JLabel("A demo for RFB protocol."));
 		jDialogAbout.add(new JLabel("Author: igor.delac@gmail.com"));
+		jDialogAbout.add(new JButtonHelpAboutOK(jDialogAbout));
 		
 		jDialogAbout.setLocation(
 				JFrameMainWindow.jFrameMainWindow.getX() + (JFrameMainWindow.jFrameMainWindow.getWidth() - jDialogAbout.getWidth()) / 2, 

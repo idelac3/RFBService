@@ -71,7 +71,7 @@ public class JFrameMainWindow extends JFrame {
 		 * Add components.
 		 */
 		setJMenuBar(new JMenuBarMain());
-		add(jTextAreaPrintout, BorderLayout.CENTER);
+		add(new JScrollPaneTextArea(), BorderLayout.CENTER);
 		add(new JPanelBottomLine(), BorderLayout.SOUTH);
 	
 		/*

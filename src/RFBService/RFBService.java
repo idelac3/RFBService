@@ -540,7 +540,9 @@ public class RFBService implements Runnable {
 		 * Button mask:
 		 * 1 - left button
 		 * 2 - middle button
-		 * 3 - right button
+		 * 4 - right button
+		 * 8 - wheel up
+		 * 16 - wheel down
 		 */
 		int buttonMask = in.read();
 		
@@ -549,9 +551,7 @@ public class RFBService implements Runnable {
 		
 
 		if (buttonMask > 0) {
-			
-			log ("Pointer event (button = " + buttonMask + ", x = " + x_pos + ", y = " + y_pos + ")");
-			
+
 			/*
 			 * Calculate real offset.
 			 */
@@ -564,9 +564,15 @@ public class RFBService implements Runnable {
 			boolean minimized = ( (JFrameMainWindow.jFrameMainWindow.getState() & Frame.ICONIFIED) == Frame.ICONIFIED );
 			
 			if (minimized) {
-				if (buttonMask > 0) {
+				
+				/*
+				 * If main window is minimized ...
+				 */
+				if ( (buttonMask & 0x111) > 0) {
+					
 					/*
-					 * On any click restore window.
+					 * ... restore main window on any click but not on mouse wheel event.
+					 * That is why mask 0x111 is used.
 					 */
 					JFrameMainWindow.jFrameMainWindow.setState(Frame.NORMAL);
 				}
@@ -574,7 +580,7 @@ public class RFBService implements Runnable {
 			else {
 
 				/*
-				 * Generate mouse click.
+				 * Check for button and generate mouse click.
 				 */
 				if (buttonMask == 1) {
 					/*
@@ -584,9 +590,27 @@ public class RFBService implements Runnable {
 				}
 				else if (buttonMask == 3) {
 					/*
+					 * Middle click.
+					 */
+					RobotMouse.robo.mouseMiddleClick(x_pos, y_pos);
+				}
+				else if (buttonMask == 4) {
+					/*
 					 * Right click.
 					 */
 					RobotMouse.robo.mouseRightClick(x_pos, y_pos);
+				}
+				else if (buttonMask == 8) {
+					/*
+					 * Mouse wheel.
+					 */
+					RobotMouse.robo.mouseWheel(-100);
+				}
+				else if (buttonMask == 16) {
+					/*
+					 * Mouse wheel.
+					 */
+					RobotMouse.robo.mouseWheel(100);
 				}
 			}
 			

@@ -127,7 +127,7 @@ public class ActionListenerFrameBufferUpdate implements ActionListener {
 	/**
 	 * Row matcher function. It compares two rows and returns positive result if they are equal.
 	 * This function does not make sense if buffers are not the same dimension.<BR>
-	 *  <B>NOTE:</B> This function does not check for index bounds in arrays!¨
+	 *  <B>NOTE:</B> This function does not check for index bounds in arrays!
 	 *  
 	 * @param buf1 first image buffer
 	 * @param row1 row in first image buffer

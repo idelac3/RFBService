@@ -31,7 +31,7 @@ public class RobotKeyboard {
 		case 0xff09:
 			doType(VK_TAB);
 			break;
-		case 0xff0d:
+		case 0xff0d: case 0xff8d:
 			doType(VK_ENTER);
 			break;
 		case 0xff1b:
@@ -67,6 +67,51 @@ public class RobotKeyboard {
 		case 0xff54:
 			doType(VK_DOWN);
 			break;
+		case 0xffbe:
+			doType(VK_F1);			
+			break;
+		case 0xffbf:
+			doType(VK_F2);			
+			break;
+		case 0xffc0:
+			doType(VK_F3);			
+			break;
+		case 0xffc1:
+			doType(VK_F4);			
+			break;
+		case 0xffc2:
+			doType(VK_F5);			
+			break;
+		case 0xffc3:
+			doType(VK_F6);			
+			break;
+		case 0xffc4:
+			doType(VK_F7);			
+			break;									
+		case 0xffc5:
+			doType(VK_F8);			
+			break;		
+		case 0xffc6:
+			doType(VK_F9);			
+			break;			
+		case 0xffc7:
+			doType(VK_F10);			
+			break;
+		case 0xffc8:
+			doType(VK_F11);			
+			break;		
+		case 0xffc9:
+			doType(VK_F12);			
+			break;		
+		case 0xffe1: case 0xffe2:
+			doType(VK_SHIFT);			
+			break;				
+		case 0xffe3: case 0xffe4:
+			doType(VK_CONTROL);			
+			break;			
+		case 0xffe9: case 0xffea:
+			doType(VK_ALT);			
+			break;			
 		default:
 			throw new IllegalArgumentException("Special key not found for: "
 					+ String.format("%08X", keyCode) );
