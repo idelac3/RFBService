@@ -83,70 +83,73 @@ public class RobotScreen {
 	
 	public int[] getDeltaImageBuffer() {
 		
-		
-		int x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+		int startRowChange = 0, endRowChange = 0;
 
-		for (int col = 4; col < width - 5; col++) {
-			/*
-			 * Look for different columns ...
-			 */
-			if (! colMatch(previousImageBuffer, col, colorImageBuffer, col, width)) {																
-				x1 = col;
-				break;
-			}
-		}
+		/*
+		 * Determine first and last rows of screen delta.
+		 */
 		
 		for (int row = 4; row < height - 5; row++) {
 			/*
-			 * Look for different rows ...
+			 * Look for first different row.
 			 */
 			if (! rowMatch(previousImageBuffer, row, colorImageBuffer, row, width)) {																
-				y1 = row;
+				startRowChange = row;
 				break;
 			}
 		}
 
-		for (int col = width - 5; col >= 4; col--) {
-			/*
-			 * Look for different columns ...
-			 */
-			if (! colMatch(previousImageBuffer, col, colorImageBuffer, col, width)) {																
-				x2 = col;
-				break;
-			}
-		}
-		
 		for (int row = height - 5; row >= 4; row--) {
 			/*
-			 * Look for different rows ...
+			 * Look for last different row.
 			 */
 			if (! rowMatch(previousImageBuffer, row, colorImageBuffer, row, width)) {																
-				y2 = row;
+				endRowChange = row;
 				break;
 			}
 		}
 		
-		if (x1 < x2 && y1 < y2) {
+		/*
+		 * If delta area of screen is found ... 
+		 */
+		if (startRowChange < endRowChange) {
 			
-			int[] delta = subBuffer(colorImageBuffer, width, x1, y1, x2, y2);
-		
-			deltaX = x1;
-			deltaY = y1;
-			deltaWidth = x2 - x1 + 1;
-			deltaHeight = y2 - y1 + 1;
+			/*
+			 * Calculate row count and pixel count.
+			 */
+			int rowCount = endRowChange - startRowChange + 1;
+			int pixelCount = rowCount * width;
 			
-			return delta;
+			/*
+			 * Allocate delta buffer for screen area between starting
+			 * and ending row.
+			 */
+			int[] deltaScreen = new int[pixelCount];
 			
+			/*
+			 * Copy from image buffer only different pixels.
+			 */
+			System.arraycopy(colorImageBuffer, startRowChange * width, deltaScreen, 0, pixelCount);
+			
+			deltaX = 0;
+			deltaY = startRowChange;
+			deltaWidth = width;
+			deltaHeight = rowCount;
+			
+			return deltaScreen;
 		}
 		else {
-
+			
+			/*
+			 * If no difference between previous and current image buffer,
+			 * return null value and set delta coordinates to 0 value.
+			 */
 			deltaX = 0;
 			deltaY = 0;
 			deltaWidth = 0;
 			deltaHeight = 0;
 			
 			return null;
-			
 		}
 		
 	}
@@ -208,6 +211,18 @@ public class RobotScreen {
 		
 	}
 
+	/**
+	 * Row matcher function. It compares two rows and returns positive result if they are equal.
+	 * This function does not make sense if buffers are not the same dimension.<BR>
+	 *  <B>NOTE:</B> This function does not check for index bounds in arrays!
+	 *  
+	 * @param buf1 first image buffer
+	 * @param row1 row in first image buffer
+	 * @param buf2 second image buffer
+	 * @param row2 row in second image buffer
+	 * @param width width of row
+	 * @return <I>true</I> if equal, otherwise <I>false</I>
+	 */
     private boolean rowMatch(int[] buf1, int row1, int[] buf2, int row2, int width) {
         boolean match = true;
         
@@ -245,7 +260,7 @@ public class RobotScreen {
 		
 		int[] newBuffer = new int[w1 * h1];
 		
-		for (int y = y1; y <= h1; y++) {
+		for (int y = y1; y < h1; y++) {
 			int srcPos = y * width + x1;
 			int destPos = (y - y1) * w1;
 			int length = w1;

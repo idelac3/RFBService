@@ -129,7 +129,7 @@ public class RFBService implements Runnable {
 	 * Screen dimension which is initially sent to client. See:<BR>
 	 * {@link #sendServerInit(int, int, String)} method.
 	 */
-	private int screenWidth, screenHeight;
+	public int screenWidth, screenHeight;
 	
 	/**
 	 * A flag that is set to <I>true</I> when client sends frame buffer update
@@ -704,9 +704,10 @@ public class RFBService implements Runnable {
 	public void sendFrameBufferUpdate(int x, int y, int width, int height, int encodingType, int[] screen) throws IOException {
 		
 		if (x + width > screenWidth || y + height > screenHeight) {
-			err ("Invalid frame update size:"); 
-			err (" x = " + x + ", y = " + y);
-			err (" width + " + width + ", height = " + height);
+			err ("Invalid frame update size request:"); 
+			err (" x, y = " + x + ", " + y);
+			err (" Width x height = " + width + " x " + height);
+			err (" Screen width x height = " + screenWidth + " x " + screenHeight);
 			return;
 		}
 		
@@ -821,6 +822,8 @@ public class RFBService implements Runnable {
 			
 			screenWidth = newWidth;
 			screenHeight = newHeight;
+			
+			log ("New screen size: " + screenWidth + " x " + screenHeight);
 			
 		}
 		else {
