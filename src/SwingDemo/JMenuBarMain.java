@@ -10,6 +10,7 @@ public class JMenuBarMain extends JMenuBar {
 
 	public JMenuBarMain() {
 		add(new JMenuFile());
+		add(new JMenuEdit());
 		add(new JMenuHelp());
 	}
 	

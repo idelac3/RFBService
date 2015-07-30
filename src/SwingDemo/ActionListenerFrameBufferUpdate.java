@@ -15,12 +15,7 @@ public class ActionListenerFrameBufferUpdate implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
-		
-		/*
-		 * First criteria for differentiated update is that screen buffer is not empty.
-		 */
-		boolean diffUpdateOfScreen = (RobotScreen.robo.getColorImageBuffer() != null);
-		
+
 		/*
 		 * Get dimensions and location of main JFrame window.
 		 */
@@ -31,97 +26,91 @@ public class ActionListenerFrameBufferUpdate implements ActionListener {
 		int height = JFrameMainWindow.jFrameMainWindow.getHeight();
 
 		/*
-		 * Here current screen buffer will be saved.
-		 */
-		int[] oldScreenBuffer = null;
-		
-		if (diffUpdateOfScreen) {
-			/*
-			 * Save reference to current screen buffer.
-			 */
-			oldScreenBuffer = RobotScreen.robo.getColorImageBuffer();
-		}
-
-		/*
 		 * Capture new screenshot into image buffer.
 		 */
 		RobotScreen.robo.getScreenshot(offsetX, offsetY, width, height);
-
-		if (diffUpdateOfScreen) {
-			/*
-			 * Differentiated update is not possible if old and new buffers are not same length.
-			 */
-			if (RobotScreen.robo.getColorImageBuffer().length != oldScreenBuffer.length) {
-				diffUpdateOfScreen = false;
-			}
-		}
 		
-		/*
-		 * For RFB protocol, put (X, Y) coordinates at (0, 0).
-		 */
-		offsetX = 0;
-		offsetY = 0;
-		
-		Iterator<RFBService> it = RFBDemo.rfbClientList.iterator();
-		while (it.hasNext()) {
+		int[] delta = RobotScreen.robo.getDeltaImageBuffer();					
 
-			RFBService rfbClient = it.next();
+		if (delta == null) {
 
-			if (rfbClient.incrementalFrameBufferUpdate) {
-
-				try {
+			offsetX = 0;
+			offsetY = 0;
 			
-					/*
-					 * Check if only different rows should be send to client.
-					 */
-					if (diffUpdateOfScreen) {
-						
-						for (int row = 0; row < height; row++) {
-							/*
-							 * Look for different rows ...
-							 */
-							if (! rowMatch(oldScreenBuffer, row, RobotScreen.robo.getColorImageBuffer(), row, width)) {								
-								
-								int[] singleRow = new int[width];
-								System.arraycopy(RobotScreen.robo.getColorImageBuffer(), row * width, singleRow, 0, width);
-								
-								/*
-								 * ... and just send difference. Equal rows skip.
-								 */
-								rfbClient.sendFrameBufferUpdate(
-										offsetX, offsetY + row, 
-										width, 1, 
-										0, 
-										singleRow);
-								
-							}
-						}
-						
-					}
-					else {
+			Iterator<RFBService> it = RFBDemo.rfbClientList.iterator();
+			while (it.hasNext()) {
+
+				RFBService rfbClient = it.next();
+
+				if (rfbClient.incrementalFrameBufferUpdate) {
+
+					try {
 
 						/*
 						 * Send complete window.
 						 */
 						rfbClient.sendFrameBufferUpdate(
-							offsetX, offsetY, 
-							width, height, 
-							0, 
-							RobotScreen.robo.getColorImageBuffer());
+								offsetX, offsetY, 
+								width, height, 
+								0, 
+								RobotScreen.robo.getColorImageBuffer());
 					}
-					
-				}
-				catch (SocketException ex) {
-					it.remove();
-				}
-				catch (IOException ex) {
-					ex.printStackTrace();
+					catch (SocketException ex) {
+						it.remove();
+					}
+					catch (IOException ex) {
+						ex.printStackTrace();
 
-					it.remove();
-				}
+						it.remove();
+					}
 
+					rfbClient.incrementalFrameBufferUpdate = false;
+
+				}
 			}
-		}				
+		}
+		else {
+
+			offsetX = RobotScreen.robo.getDeltaX();
+			offsetY = RobotScreen.robo.getDeltaY();
+
+			width =  RobotScreen.robo.getDeltaWidth();
+			height =  RobotScreen.robo.getDeltaHeight();
+
+			Iterator<RFBService> it = RFBDemo.rfbClientList.iterator();
+			while (it.hasNext()) {
+
+				RFBService rfbClient = it.next();
+
+				if (rfbClient.incrementalFrameBufferUpdate) {
+
+					try {
+						/*
+						 * Send only delta rectangle.
+						 */
+						rfbClient.sendFrameBufferUpdate(
+								offsetX, offsetY, 
+								width, height, 
+								0, 
+								delta);
+
+
+
+					}
+					catch (SocketException ex) {
+						it.remove();
+					}
+					catch (IOException ex) {
+						ex.printStackTrace();
+
+						it.remove();
+					}
+
+					rfbClient.incrementalFrameBufferUpdate = false;
+
+				}
+			}
+		}
 	}
 
 	/**
@@ -150,4 +139,35 @@ public class ActionListenerFrameBufferUpdate implements ActionListener {
         
         return match;
     }
+
+    private boolean colMatch(int[] buf1, int col1, int[] buf2, int col2, int width) {
+        boolean match = true;
+        
+        for (int i = col1, j = col2;
+                i < buf1.length && j < buf2.length;
+                i = i + width, j = j + width) {
+            if (buf1[i] != buf2[j]) {
+                match = false;
+                break;
+            }
+        }
+        
+        return match;
+    }
+    
+    private int[] subBuffer(int[] buffer, int width, int x1, int y1, int x2, int y2) {
+    	
+		int w1 = x2 - x1 + 1;
+		int h1 = y2 - y1 + 1;
+		
+		int[] newBuffer = new int[w1 * h1];
+		
+		for (int y = y1; y <= h1; y++) {
+			int srcPos = y * width + x1;
+			int destPos = (y - y1) * w1;
+			int length = w1;
+			System.arraycopy(buffer, srcPos, newBuffer, destPos, length);
+		}
+		return newBuffer;
+	}
 }

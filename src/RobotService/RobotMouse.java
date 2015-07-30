@@ -5,7 +5,8 @@ import java.awt.Robot;
 import java.awt.event.InputEvent;
 
 /**
- * This Robot class can send mouse events to desktop, like mouse move, click etc.
+ * This Robot class can send mouse events 
+ * to desktop, like mouse move, click etc.
  * 
  * @author igor.delac@gmail.com
  *

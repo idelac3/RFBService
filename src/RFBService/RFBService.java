@@ -485,7 +485,9 @@ public class RFBService implements Runnable {
 		}
 		
 		/*
-		 * Down flag means that user released key.
+		 * Down flag:
+		 *  0 -  user released key.
+		 *  1 -  user press key.
 		 */
 		int downFlag = in.read();
 		
@@ -494,32 +496,7 @@ public class RFBService implements Runnable {
 		
 		int keyValue = readU32int();		
 
-		try {
-			
-			if (downFlag == 0) {
-
-				if ( (keyValue & 0x0000FF00) == 0x0000FF00) {
-
-					/*
-					 * Special keys.
-					 */
-					RobotKeyboard.robo.special(keyValue);
-
-				}
-				else {
-
-					/*
-					 * ASCII key.
-					 */
-					char c = (char) keyValue;		
-					RobotKeyboard.robo.type(c);
-
-				}
-			}
-			
-		} catch (IllegalArgumentException ex) {
-			err ("Key event, hex code = 0x" + String.format("%08X", keyValue) );	
-		}
+		RobotKeyboard.robo.sendKey(keyValue, downFlag);
 
 	}
 	
@@ -549,14 +526,13 @@ public class RFBService implements Runnable {
 		int x_pos = readU16int();
 		int y_pos = readU16int();
 		
+		/*
+		 * Calculate real offset.
+		 */
+		x_pos = x_pos + JFrameMainWindow.jFrameMainWindow.getX();
+		y_pos = y_pos + JFrameMainWindow.jFrameMainWindow.getY();
 
 		if (buttonMask > 0) {
-
-			/*
-			 * Calculate real offset.
-			 */
-			x_pos = x_pos + JFrameMainWindow.jFrameMainWindow.getX();
-			y_pos = y_pos + JFrameMainWindow.jFrameMainWindow.getY();
 			
 			/*
 			 * Consider case when main window is minimized.
@@ -615,6 +591,12 @@ public class RFBService implements Runnable {
 			}
 			
 		}
+		else {
+			/*
+			 * Move mouse pointer only.
+			 */
+			RobotMouse.robo.mouseMove(x_pos, y_pos);
+		}
 		
 	}
 
@@ -647,7 +629,6 @@ public class RFBService implements Runnable {
 			Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 		    clipboard.setContents(selection, selection);
 			
-		    log ("Client cut text: " + new String(textBuffer));
 		}
 		else {
 			throw new IOException();
@@ -745,6 +726,10 @@ public class RFBService implements Runnable {
 		writeU16int(height);
 		writeS32int(encodingType);
 
+		log ("Framebuffer update at (" + x + ", " + y + "). Rectangle: " + width + "x" + height + 
+				", encoding: " + encodingType + ", incremental: " + incrementalFrameBufferUpdate +
+				", bits per pixel: " + bits_per_pixel);
+		
 		for (int rgbValue : screen) {
 
 			int red   = (rgbValue & 0x000000FF);
@@ -787,7 +772,7 @@ public class RFBService implements Runnable {
 			y = 0;
 			int encodingType = 0;
 			int[] screen = RobotScreen.robo.getColorImageBuffer();
-			
+					
 			byte messageType = 0x00;
 			byte padding     = 0x00;
 			
@@ -833,6 +818,9 @@ public class RFBService implements Runnable {
 			writeS32int(encodingType);
 			
 			out.flush();
+			
+			screenWidth = newWidth;
+			screenHeight = newHeight;
 			
 		}
 		else {
