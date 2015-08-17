@@ -96,6 +96,7 @@ public class ActionListenerFrameBufferUpdate implements ActionListener {
 				if (rfbClient.incrementalFrameBufferUpdate) {
 
 					try {
+						
 						/*
 						 * Send only delta rectangle.
 						 */
@@ -104,8 +105,6 @@ public class ActionListenerFrameBufferUpdate implements ActionListener {
 								width, height, 
 								0, 
 								delta);
-
-
 
 					}
 					catch (SocketException ex) {

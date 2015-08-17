@@ -81,6 +81,11 @@ public class RobotScreen {
 	    
 	}
 	
+	/**
+	 * Calculate difference between current pixel area and previous.
+	 * The one already stored in image buffer. 
+	 * @return part of image buffer which is different, or <I>null</I> if no difference exist 
+	 */
 	public int[] getDeltaImageBuffer() {
 		
 		int startRowChange = 0, endRowChange = 0;

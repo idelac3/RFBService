@@ -135,7 +135,7 @@ public class RFBService implements Runnable {
 	 * A flag that is set to <I>true</I> when client sends frame buffer update
 	 * request with incremental flag.<BR>
 	 * This flag is then used by Swing components and listeners to determine if
-	 * screen update should be sent to vnc viewer(s).
+	 * screen update should be sent to VNC viewer(s).
 	 */	
 	public boolean incrementalFrameBufferUpdate;
 	
