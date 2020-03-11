@@ -1,9 +1,9 @@
 package com.scoreunit.rfb.service;
 
-import java.awt.Toolkit;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.Socket;
 
 /**
@@ -21,15 +21,14 @@ public class ServerInit {
 	 * Write server init. message.
 	 * 
 	 * @param outputStream				-	instance of {@link OutputStream} where to write, typically obtained from {@link Socket#getOutputStream()} method
+	 * @param width						-	screen or region of screen width, in pixel
+	 * @param height					-	screen or region of screen height, in pixel
 	 * 
 	 * @throws IOException	if connection is broken
 	 */
-	public static void send(final OutputStream outputStream) throws IOException {
+	public static void send(final OutputStream outputStream, final short width, final short height) throws IOException {
 		
 		final DataOutputStream out = new DataOutputStream(outputStream);
-		
-		short width  = (short) Toolkit.getDefaultToolkit().getScreenSize().width;
-		short height = (short) Toolkit.getDefaultToolkit().getScreenSize().height;
 		
 		out.writeShort(width);
 		out.writeShort(height);
@@ -38,8 +37,12 @@ public class ServerInit {
 		SetPixelFormat.write(outputStream, pixelFormat);
 
 		final String title = 
-				String.format("%s\\%s", System.getProperty("host.name")
-						, System.getProperty("user.name"));
+				String.format("%s\\%s [%s %s]"
+						, InetAddress.getLocalHost().getHostName()
+						, System.getProperty("user.name")
+						, System.getProperty("os.name")
+						, System.getProperty("os.arch")
+						);
 		
 		out.writeInt(title.length());
 		out.write(title.getBytes());			

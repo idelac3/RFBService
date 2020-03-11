@@ -1,12 +1,18 @@
 package com.scoreunit.rfb.screen;
 
-import java.io.DataInputStream;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.imageio.ImageIO;
+
+import com.scoreunit.rfb.image.TrueColorImage;
+
 /**
  * Few methods that will help to load 'Loading ...' image,
- * stored in raw format (32-bit, RGB0 pixel format).
+ * stored in raw format (32-bit, ARGB pixel format).
  * 
  * @author igor.delac@gmail.com
  *
@@ -14,47 +20,31 @@ import java.io.InputStream;
 public class LoadingResource {
 	
 	/**
-	 * Load image as resource.
+	 * Load image from resource file.
 	 * 
-	 * @return	image raw data, RGB0 pixel format
+	 * @return	image raw data, ARGB pixel format
 	 * 
-	 * @throws IOException	if resource file 'loading.raw' is not on class path
+	 * @throws IOException	if resource file 'loading.png' is not on class path
 	 */
-	public static byte[] raw() throws IOException {
+	public static TrueColorImage get() throws IOException {
 		
 		final InputStream inputStream = 
-				LoadingResource.class.getClassLoader().getResourceAsStream("loading.raw");
+				LoadingResource.class.getClassLoader().getResourceAsStream("loading.png");
 		
 		if (inputStream == null) {
 			
-			throw new IOException("Resource 'loading.raw' not found on class path.");
+			throw new IOException("Resource 'loading.png' not found on class path.");
 		}
-								
-		final byte[] result = new byte[187200]; // Exact size of file 'loading.raw'
-		final DataInputStream in = new DataInputStream(inputStream);
 		
-		in.readFully(result);
+		final BufferedImage pngImage = ImageIO.read(inputStream);
+		final BufferedImage newImage = new BufferedImage(pngImage.getWidth(), pngImage.getHeight(), BufferedImage.TYPE_INT_ARGB);
+
+		final Graphics2D graphics = newImage.createGraphics();
+		graphics.drawImage(pngImage, 0, 0, pngImage.getWidth(), pngImage.getHeight(), null);
+		graphics.dispose();
 		
-		return result;
-	}
-	
-	/**
-	 * Obtain width of 'loading.raw' image.
-	 * 
-	 * @return	width in pixel
-	 */
-	public static short getWidth() {
-		
-		return 260;
-	}
-	
-	/**
-	 * Obtain height of 'loading.raw' image.
-	 * 
-	 * @return	height in pixel
-	 */
-	public static short getHeight() {
-		
-		return 180;
+	    final int[] colorImageBuffer = ((DataBufferInt) newImage.getRaster().getDataBuffer()).getData();
+
+	    return new TrueColorImage(colorImageBuffer, newImage.getWidth(), newImage.getHeight());
 	}
 }

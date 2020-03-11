@@ -95,8 +95,10 @@ public class ClientHandlerTest {
 		
 		final Socket socket = new Socket(InetAddress.getLoopbackAddress(), tcpPort);
 
-		final ClientHandler handler = new ClientHandler(socket);
-		handler.setPassword(secret);
+		final RFBConfig config = new RFBConfig();
+		config.setPassword(secret);
+		
+		final ClientHandler handler = new ClientHandler(socket, config);		
 		handler.run();
 	}
 

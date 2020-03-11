@@ -3,12 +3,26 @@ package com.scoreunit.rfb.service;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.scoreunit.rfb.screen.ScreenClip;
+
+/**
+ * RFB service is Java implementation of VNC server.
+ * <p>
+ * <b>RFB</b> stands for <i>remote frame buffer</i> protocol.
+ * <p>
+ * This is simple implementations, mainly to demonstrate implementation of protocol.
+ * It is not efficient as other implementations, nor does it compete with them.
+ *  
+ * @author igor.delac@gmail.com
+ *
+ */
 public class RFBService implements Runnable {
 
 	public final static Logger log = LoggerFactory.getLogger(RFBService.class);
@@ -23,16 +37,21 @@ public class RFBService implements Runnable {
 	
 	private final List<ClientHandler> clientHandlers;
 	
-	/**
-	 * Used for VNC auth.
-	 */
-	private String secret;
+	private RFBConfig rfbConfig;
 	
+	/**
+	 * Create default instance, with TCP port set to {@link #DEFAULT_PORT} value.
+	 */
 	public RFBService() {
 		
 		this(DEFAULT_PORT);
 	}
 	
+	/**
+	 * Create new instance with given TCP port value.
+	 * 
+	 * @param port	-	TCP port on which to listen
+	 */
 	public RFBService(final int port) {
 	
 		this.port = port;
@@ -40,24 +59,68 @@ public class RFBService implements Runnable {
 		this.running = false;
 		
 		this.clientHandlers = new ArrayList<>();
+		
+		this.rfbConfig = new RFBConfig();
 	}
 
-	public void setPassword(final String pwd) {
+	/**
+	 * Set listening TCP port. Set value before {@link #start()} method is invoked.
+	 * 
+	 * @param port		-	TCP port to bind to
+	 */
+	public void setPort(final int port) {
 		
-		this.secret = pwd;
+		this.port = port;
+	}
+
+	/**
+	 * TCP port value. 
+	 * <p>
+	 * Note that this information is 
+	 * not useful to determine if RFB service has connected
+	 * to VNC client, or RFB service has bind and waits for VNC
+	 * client connection.
+	 * 
+	 * @return	TCP port value
+	 */
+	public int getPort() {
+		
+		return this.port;
 	}
 	
+	/**
+	 * If password is set, then VNC auth. is enabled. Client will be asked
+	 * to provide secret password.
+	 *  
+	 * @param pwd	-	secret password that VNC client must provide to authenticate
+	 */
+	public void setPassword(final String pwd) {
+		
+		this.rfbConfig.setPassword(pwd);
+	}
+	
+	/**
+	 * Check if it's running.
+	 * 
+	 * @return	true if RFB service is running
+	 */
 	public boolean isRunning() {
 		
 		return this.running;
 	}
 
+	/**
+	 * Start service. This method will create new thread.
+	 */
 	public void start() {
 		
 		final Thread thread = new Thread(this, this.toString());
 		thread.start();		
 	}
 
+	/**
+	 * Terminate existing RFB service thread.
+	 */
 	public void terminate() {
 	
 		try {
@@ -78,11 +141,72 @@ public class RFBService implements Runnable {
 		}
 	}
 	
+	/**
+	 * Get list of client handlers. Note that 
+	 * this list might contain clients that were disconnected as well.
+	 * 
+	 * @return	list of {@link ClientHandler} instances
+	 */
 	public List<ClientHandler> getClientHandlers() {
 		
 		return new ArrayList<>(this.clientHandlers);
 	}
 	
+	/**
+	 * Set {@link ScreenClip}. Screen clip object defines which area of screen should be 
+	 * presented to VNC client.
+	 * <p>
+	 * This is useful if only primary screen should be shared, in multi-monitor setups, etc.
+	 * 
+	 * @param	clip	-	new {@link ScreenClip} object
+	 */
+	public void setScreenClip(final ScreenClip clip) {
+		
+		this.rfbConfig.setScreenClip(clip);
+	}
+
+	/**
+	 * Instead of binding to TCP port, and waiting for VNC client to connect,
+	 * it is possible to establish TCP connection to VNC client.
+	 * 
+	 * @param hostname	-	VNC client IP address, or host name
+	 * @param port		-	TCP port value on which VNC client is listening
+	 * 
+	 * @throws IOException		if VNC client is unreachable  
+	 * @throws UnknownHostException 
+	 */
+	public void connect(final String hostname, final int port) throws UnknownHostException, IOException {
+		
+		final Socket socket = new Socket(hostname, port);
+		final ClientHandler clientHandler = new ClientHandler(socket, this.rfbConfig);
+		
+		final Thread clientThread = new Thread(clientHandler
+				, String.format("%s-[%s:%d]", ClientHandler.class.getSimpleName(), hostname, port));
+		clientThread.start();
+	}
+	
+	/**
+	 * Set {@link ScreenClip}. Screen clip object defines which area of screen should be 
+	 * presented to VNC client.
+	 * <p>
+	 * This is useful if only primary screen should be shared, in multi-monitor setups, etc.
+	 * <p>
+	 * <b>NOTE</b>
+	 * <p>
+	 * Ensure that <i>(xPos, yPos)</i> offset value does not cross real screen dimension.
+	 * Also ensure that <i>(width, height)</i> with given offset does not fall off screen.
+	 * 
+	 * @param	xPos		-	x offset, top-left corner is at (0, 0), in pixel
+	 * @param	yPos		-	y offset, top-left corner is at (0, 0), in pixel
+	 * @param	width		-	width of screen image region, in pixel
+	 * @param	height		-	height of screen image region, in pixel
+	 */
+	public void setScreenClip(final short xPos, final short yPos,
+			final short width, final short height) {
+		
+		this.rfbConfig.setScreenClip(new ScreenClip(xPos, yPos, width, height));
+	}
+
 	public void run() {
 		
 		//
@@ -94,6 +218,11 @@ public class RFBService implements Runnable {
 			try {
 			
 				this.socket = new ServerSocket(this.port);
+				
+				log.info(
+						String.format("RFB service (VNC server) started at TCP port '%d'.",
+								this.socket.getLocalPort())
+						);
 			} catch (final IOException exception) {
 
 				log.error(
@@ -124,8 +253,7 @@ public class RFBService implements Runnable {
 				
 				final Socket clientSocket = this.socket.accept();
 				
-				final ClientHandler handler = new ClientHandler(clientSocket);
-				handler.setPassword(secret);
+				final ClientHandler handler = new ClientHandler(clientSocket, this.rfbConfig);
 				
 				final Thread clientThread = new Thread(handler, handler.toString());
 				clientThread.start();

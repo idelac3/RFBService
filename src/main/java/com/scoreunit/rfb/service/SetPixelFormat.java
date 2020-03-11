@@ -16,7 +16,7 @@ import java.io.OutputStream;
  * @author igor.delac@gmail.com
  *
  */
-class SetPixelFormat {
+public class SetPixelFormat {
 
 	public byte bitsPerPixel, depth, bigEndianFlag, trueColorFlag;
 	
@@ -144,5 +144,17 @@ class SetPixelFormat {
 		in.read(new byte[3]); // Padding.
 		
 		return setPixelFormat;
+	}
+
+	public static SetPixelFormat default32bit() {
+
+		return new SetPixelFormat(
+				(byte) 32			// bits per pixel
+				, (byte) 24			// depth
+				, (byte) 0			// big endian
+				, (byte) 1			// true color
+				, (short) 255, (short) 255, (short) 255	// red, green, blue max.
+				, (byte) 16, (byte) 8, (byte) 0	// red, green, blue shift.
+				);
 	}
 }

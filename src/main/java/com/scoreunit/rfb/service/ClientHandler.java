@@ -1,5 +1,8 @@
 package com.scoreunit.rfb.service;
 
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,6 +11,10 @@ import java.net.Socket;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.scoreunit.rfb.keyboard.KeyboardController;
+import com.scoreunit.rfb.mouse.MouseController;
+import com.scoreunit.rfb.screen.ScreenCapture;
 
 /**
  * This is socket handler that will handle client connection.
@@ -27,34 +34,33 @@ class ClientHandler implements Runnable {
 	
 	private boolean running;
 	
-	private String password;
+	private final RFBConfig config;
 	
-	public ClientHandler(final Socket socket) {
+	public ClientHandler(final Socket socket, final RFBConfig config) {
 		
 		this.socket = socket;
 		
 		this.running = false;
+		
+		this.config = config;
 	}
 	
 	/**
-	 * Set new password, for VNC auth. method.
-	 * If null, then authentication is disabled (default).
+	 * Check if client thread is running.
 	 * 
-	 * @param secret	-	new password to challenge VNC client with
+	 * @return	true if client thread is running
 	 */
-	public void setPassword(final String secret) {
-		
-		this.password = secret;
-	}
-	
 	public boolean isRunning() {
 		
 		return this.running;
 	}
 	
+	/**
+	 * Terminate connection with VNC client.
+	 */
 	public void terminate() {
 	
-		if (this.socket == null) {
+		if (this.socket != null) {
 			
 			try {
 			
@@ -66,6 +72,36 @@ class ClientHandler implements Runnable {
 				log.error("Client handler termination failure.", exception);
 			}
 		}
+	}
+
+	/**
+	 * Fetch screen (clip) width in pixel.
+	 * 
+	 * @return	width of screen, or region of screen that is presented to VNC client
+	 */
+	private short getWidth() {
+	
+		if (this.config.getScreenClip() != null) {
+			
+			return this.config.getScreenClip().width;
+		}
+		
+		return (short) ScreenCapture.getScreenWidth();
+	}
+	
+	/**
+	 * Fetch screen (clip) height in pixel.
+	 * 
+	 * @return	height of screen, or region of screen that is presented to VNC client
+	 */
+	private short getHeight() {
+	
+		if (this.config.getScreenClip() != null) {
+			
+			return this.config.getScreenClip().height;
+		}
+		
+		return (short) ScreenCapture.getScreenHeight();
 	}
 	
 	@Override
@@ -107,7 +143,9 @@ class ClientHandler implements Runnable {
 			// This is updater for frame buffer, running it its own thread.
 			// Updater will receive frame buffer update requests from this thread,
 			//  and it will write response message back to socket.
-			frameBufferUpdater = new FramebufferUpdater(this.toString(), out);	
+			frameBufferUpdater = new FramebufferUpdater(this, out);
+			frameBufferUpdater.setScreenClip(this.config.getScreenClip()); // Forward information about screen region, if set.
+			frameBufferUpdater.setPreferredEncodings(this.config.getPreferredEncodings()); // If set, favor encodings of RFB service, instead of VNC client encoding list.
 			frameBufferUpdater.start();
 			
 			//
@@ -125,7 +163,7 @@ class ClientHandler implements Runnable {
 			
 			final byte[] securityTypes;
 			
-			if (this.password == null) {
+			if (this.config.getPassword() == null) {
 				
 				securityTypes = new byte[] {SecurityTypes.NONE};
 			}
@@ -140,7 +178,7 @@ class ClientHandler implements Runnable {
 			if (sec.securityType == SecurityTypes.VNC_AUTH) {
 				
 				// Send challenge data if VNC auth. is used.
-				final VNCAuth vncAuth = new VNCAuth(this.password);
+				final VNCAuth vncAuth = new VNCAuth(this.config.getPassword());
 				vncAuth.sendChallenge(out);
 				vncAuth.readChallenge(in);
 				
@@ -176,7 +214,7 @@ class ClientHandler implements Runnable {
 			// ServerInit prepare and send.
 			//
 			
-			ServerInit.send(out);
+			ServerInit.send(out, this.getWidth(), this.getHeight());
 			
 			//
 			// Run in loop, wait for some requests from client. 
@@ -213,11 +251,14 @@ class ClientHandler implements Runnable {
 					
 					in.read(new byte[3]); // padding.
 					setPixelFormat = SetPixelFormat.read(in);
+					
+					frameBufferUpdater.setPixelFormat(setPixelFormat);
 				}
 				else if (msgType == SET_ENCODINGS) {
 					
 					in.read(); // padding.					
 					setEncodings = SetEncodings.read(in);
+					frameBufferUpdater.setClientEncodings(setEncodings);
 				}
 				else if (msgType == FRAMEBUFFER_UPDATE_REQUEST) {
 					
@@ -225,6 +266,52 @@ class ClientHandler implements Runnable {
 							FramebufferUpdateRequest.read(in);
 
 					frameBufferUpdater.update(request);
+				}
+				else if (msgType == KEY_EVENT) {
+				
+					final KeyEvent keyEvent = KeyEvent.read(in);
+					KeyboardController.sendKey(keyEvent.key, keyEvent.downFlag);
+				}
+				else if (msgType == POINTER_EVENT) {
+					
+					final PointerEvent pointerEvent = PointerEvent.read(in);
+					
+					/*
+					 * Button mask:
+					 * 1 - left button
+					 * 2 - middle button
+					 * 4 - right button
+					 * 8 - wheel up
+					 * 16 - wheel down
+					 */
+					int buttonMask = pointerEvent.buttonMask;
+					
+					int x = pointerEvent.xPos;
+					int y = pointerEvent.yPos;
+					
+					switch (buttonMask) {
+					case 1: MouseController.mouseClick(x, y); break;
+					case 2: MouseController.mouseMiddleClick(x, y); break;
+					case 4: MouseController.mouseRightClick(x, y); break;
+					case 8: MouseController.mouseWheel(100); break;
+					case 16: MouseController.mouseWheel(-100); break;
+					}
+				}
+				else if (msgType == CLIENT_CUT_TEXT) {
+					
+					final ClientCutText event = ClientCutText.read(in);
+					
+					try {
+					
+						final Clipboard clipboard = 
+								Toolkit.getDefaultToolkit().getSystemClipboard();
+						final StringSelection selection = new StringSelection(event.text);
+						clipboard.setContents(selection, selection);
+					}
+					catch (final Exception ex) {
+						
+						log.error("Unable to copy to clipboard text.", ex);
+					}
 				}
 			}			
 			
@@ -234,7 +321,9 @@ class ClientHandler implements Runnable {
 
 			if (this.running == true) {
 			
-				log.error("Client connection closed.");
+				log.info(
+						String.format("Client connection '%s' closed.", this.socket.getRemoteSocketAddress())
+						);
 			}
 		}
 		

@@ -1,6 +1,7 @@
 package com.scoreunit.rfb.encoding;
 
 import com.scoreunit.rfb.screen.ScreenCapture;
+import com.scoreunit.rfb.service.SetPixelFormat;
 
 /**
  * Every framebuffer encoding algo. should implement this inferface.
@@ -25,7 +26,17 @@ public interface EncodingInterface {
 	 * @param width		-	width in pixel
 	 * @param height	-	height in pixel
 	 * 
+	 * @param pixelFormat		-	desired pixel format, since VNC client might request 8-bit pixel encoding, and source image is 32-bit
+	 * 								this parameter will help encoder to properly determine pixel format and transformation
+	 * 
 	 * @return	encoded image, or part of image
 	 */
-	public byte[] encode(final int[] image, final int width, final int height);
+	public byte[] encode(final int[] image, final int width, final int height, final SetPixelFormat pixelFormat);
+
+	/**
+	 * An encoding type value, eg. {@link Encodings#RAW}, {@link Encodings#HEXTILE}, etc.
+	 * 
+	 * @return	encoding type value, depends on encoding algo.
+	 */
+	public int getType();
 }
