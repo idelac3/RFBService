@@ -6,7 +6,13 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
@@ -14,6 +20,8 @@ import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
+
+import com.scoreunit.rfb.screen.ScreenClip;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class RFBServiceTest {
@@ -29,6 +37,21 @@ public class RFBServiceTest {
 		
 			this.tcpPort = randomPort();
 		}
+	}
+
+	@Test
+	public void test_00_getterSetters() {
+		
+		final RFBService service = new RFBService();
+		assertEquals(RFBService.DEFAULT_PORT, service.getPort());
+		
+		service.setPort(6900);
+		assertEquals(6900, service.getPort());
+		
+		service.setScreenClip( (short) 1, (short) 2, (short) 3, (short) 4);
+		service.setScreenClip(new ScreenClip((short) 1, (short) 2, (short) 3, (short) 4));
+		
+		service.setPassword("blabla123");
 	}
 	
 	@Test
@@ -78,6 +101,43 @@ public class RFBServiceTest {
 		waitFor(TIMEOUT, (x) -> service.isRunning() == false );
 		
 		assertEquals(0, service.getClientHandlers().size());		
+	}
+	
+	@Test
+	public void test_03_connectToClient() throws TimeoutException, IOException, InterruptedException, ExecutionException {
+
+		final ExecutorService executor = Executors.newSingleThreadExecutor();
+		
+		final int clientPort = randomPort();
+		
+		final ServerSocket client = new ServerSocket(clientPort);
+		final Future<String> future = executor.submit( () -> {
+			
+			try {
+				
+				Socket socket = client.accept();
+				
+				byte[] buf = new byte[12]; // RFB proto.version string. 
+				socket.getInputStream().read(buf);
+				
+				socket.close();
+				
+				return new String(buf);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			return null;
+		});
+		
+		final RFBService service = new RFBService();
+		service.connect(InetAddress.getLoopbackAddress().getHostAddress(), clientPort);
+		
+		final String result = future.get(1, TimeUnit.SECONDS);
+		assertEquals(ProtocolVersion.ver, result);
+		
+		client.close();
 	}
 	
 	/**

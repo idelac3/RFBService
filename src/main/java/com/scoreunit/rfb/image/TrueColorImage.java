@@ -33,6 +33,27 @@ public class TrueColorImage {
 		this.height = height;
 	}
 
+	public void setPixel(int x, int y, int value) {
+		
+		if (x >= width || y >= height) {
+			
+			throw new IllegalArgumentException(String.format("Pixel value out of range: (%d, %d)", x, y));
+		}
+		
+		this.raw[x + y * width] = value;
+	}
+
+
+	public int getPixel(int x, int y) {
+		
+		if (x >= width || y >= height) {
+			
+			throw new IllegalArgumentException(String.format("Pixel value out of range: (%d, %d)", x, y));
+		}
+		
+		return this.raw[x + y * width];
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

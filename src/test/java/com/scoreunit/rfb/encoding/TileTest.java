@@ -193,5 +193,11 @@ public class TileTest {
 		
 		assertEquals(16, tiles.get(3).xPos);
 		assertEquals(16, tiles.get(3).yPos);
+		
+		final List<Tile> tile0 = Tile.build(image16x16, 16, 16);
+		assertEquals(tile0.get(0), tiles.get(0));
+		assertEquals(tile0.get(0).hashCode(), tiles.get(0).hashCode());
+		
+		assertNotNull(tiles.get(0).toString());
 	}
 }

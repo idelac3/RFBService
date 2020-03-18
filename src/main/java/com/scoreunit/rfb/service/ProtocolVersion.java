@@ -6,7 +6,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Arrays;
 
-public class ProtocolVersion {
+class ProtocolVersion {
 
 	/**
 	 * 'The RFB Protocol' documentation, page 8,

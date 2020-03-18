@@ -40,7 +40,7 @@ public class VNCAuth {
 	}
 	
 	/**
-	 * Write supported security types.
+	 * Write challenge message.
 	 * 
 	 * @param out				-	instance of {@link OutputStream} where to write, typically obtained from {@link Socket#getOutputStream()} method
 	 * 
@@ -70,12 +70,11 @@ public class VNCAuth {
 	}
 	
 	/**
-	 * Read client protocol version string value.
+	 * Read client challenge response value.
 	 * 
 	 * @param in			-	instance of {@link InputStream} used to read, typically obtained from {@link Socket#getInputStream()} method
-	 * @return	instance of {@link VNCAuth} object with values stored in {@link major} and {@link #minor} members
 	 * 
-	 * @throws IOException	if version string probided by client does not look right, see {@link #ver} how value should look
+	 * @throws IOException	if version string provided by client does not look right, see {@link #ver} how value should look
 	 */
 	public void readChallenge(final InputStream in) throws IOException {
 				

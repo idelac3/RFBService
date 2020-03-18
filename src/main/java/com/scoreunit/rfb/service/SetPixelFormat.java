@@ -69,9 +69,9 @@ public class SetPixelFormat {
 		this.bigEndianFlag = 0;
 		this.trueColorFlag = 1;
 		
-		this.redMax   = (byte) 0xFF;
-		this.greenMax = (byte) 0xFF;
-		this.blueMax  = (byte) 0xFF;
+		this.redMax   = (short) 255;
+		this.greenMax = (short) 255;
+		this.blueMax  = (short) 255;
 		
 		this.redShift   = 16;
 		this.greenShift = 8;

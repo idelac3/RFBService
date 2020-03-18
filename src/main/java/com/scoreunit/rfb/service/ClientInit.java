@@ -41,10 +41,4 @@ public class ClientInit {
 		
 		return new ClientInit(sharedDesktop > 0);
 	}
-	
-	@Override
-	public String toString() {
-		
-		return String.format("ClientInit [shared desktop=%b]", this.sharedDesktop);
-	}
 }

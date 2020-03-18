@@ -10,6 +10,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.scoreunit.rfb.encoding.Encodings;
 import com.scoreunit.rfb.screen.ScreenClip;
 
 /**
@@ -97,6 +98,19 @@ public class RFBService implements Runnable {
 	public void setPassword(final String pwd) {
 		
 		this.rfbConfig.setPassword(pwd);
+	}
+	
+	/**
+	 * Configure a list of encodings which are preferred, instead
+	 * of list provided by VNC client.
+	 * <p>
+	 * If set to null value, then client encoding list is considered.
+	 *  
+	 * @param encodings		-	eg. {@link Encodings#ZLIB}, {@link Encodings#HEXTILE}, etc.
+	 */
+	public void setPreferredEncodings(final int[] encodings) {
+	
+		this.rfbConfig.setPreferredEncodings(encodings);
 	}
 	
 	/**
@@ -201,8 +215,8 @@ public class RFBService implements Runnable {
 	 * @param	width		-	width of screen image region, in pixel
 	 * @param	height		-	height of screen image region, in pixel
 	 */
-	public void setScreenClip(final short xPos, final short yPos,
-			final short width, final short height) {
+	public void setScreenClip(final int xPos, final int yPos,
+			final int width, final int height) {
 		
 		this.rfbConfig.setScreenClip(new ScreenClip(xPos, yPos, width, height));
 	}

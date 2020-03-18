@@ -15,7 +15,7 @@ import java.net.Socket;
  * @author igor.delac@gmail.com
  *
  */
-public class ServerInit {
+class ServerInit {
 
 	/**
 	 * Write server init. message.
@@ -33,7 +33,7 @@ public class ServerInit {
 		out.writeShort(width);
 		out.writeShort(height);
 		
-		final SetPixelFormat pixelFormat = new SetPixelFormat(); // Default should be ok.
+		final SetPixelFormat pixelFormat = SetPixelFormat.default32bit(); // Default should be ok.
 		SetPixelFormat.write(outputStream, pixelFormat);
 
 		final String title = 

@@ -247,6 +247,13 @@ class FramebufferUpdater implements Runnable {
 				
 				final FramebufferUpdateRequest updateRequest = this.updateRequests.poll(DELAY, TimeUnit.MILLISECONDS);
 
+				// Here be careful to check updateRequest object against null value,
+				//  since frame buffer updater thread is started in parallel with client handler thread.
+				if (updateRequest == null) {
+				
+					continue; // go back, and wait again for update request.
+				}
+				
 				if (this.loadingState == true) {
 
 					//
@@ -259,6 +266,10 @@ class FramebufferUpdater implements Runnable {
 				}
 				else if (this.richCursorSent == false &&
 						this.pixelFormat.bitsPerPixel == 32) {
+					
+					//
+					// Here is routine to send rich cursor data, which is available if pixel format is set to 32-bit.
+					//
 					
 					this.framebufferUpdateRichCursor();
 					
@@ -308,45 +319,7 @@ class FramebufferUpdater implements Runnable {
 						, y = this.screenClip.yPos
 						, w = this.screenClip.width
 						, h = this.screenClip.height;
-				//
-				// Basic check if screen region is not outside 
-				//  available screen image.
-				//
-				
-				if (x < 0 || x > w) {
-					
-					log.error(String.format("Screen clip (x ,y) offset is set to wrong value: ('%d', '%d'). Screen size is: ('%d', '%d')."
-							, x, y, ScreenCapture.getScreenWidth(), ScreenCapture.getScreenHeight()));
-					
-					x = 0;
-				}
-				
-				if (y < 0 || y > h) {
-					
-					log.error(String.format("Screen clip (x ,y) offset is set to wrong value: ('%d', '%d'). Screen size is: ('%d', '%d')."
-							, x, y, ScreenCapture.getScreenWidth(), ScreenCapture.getScreenHeight()));
-					
-					y = 0;
-				}
-				
-				if (x + w > ScreenCapture.getScreenWidth()) {
-				
-					log.error(String.format("Screen clip dimension (width, height) is set to wrong value: ('%d', '%d'). Screen size is: ('%d', '%d')."
-							, w, h, ScreenCapture.getScreenWidth(), ScreenCapture.getScreenHeight()));
-					
-					x = 0;
-					w = ScreenCapture.getScreenWidth();
-				}
 
-				if (y + h > ScreenCapture.getScreenHeight()) {
-					
-					log.error(String.format("Screen clip dimension (width, height) is set to wrong value: ('%d', '%d'). Screen size is: ('%d', '%d')."
-							, w, h, ScreenCapture.getScreenWidth(), ScreenCapture.getScreenHeight()));
-					
-					y = 0;
-					h = ScreenCapture.getScreenHeight();
-				}
-				
 				// Return region (clip) of screen image.
 				return ScreenCapture.getScreenshot(x, y, w, h);
 			}
@@ -438,6 +411,8 @@ class FramebufferUpdater implements Runnable {
 						this.lastEncoder = new RawEncoder();
 					}
 					
+					log.info(String.format("Selected preferred encoder: '%s'.", this.lastEncoder.getClass().getSimpleName()));
+					
 					return this.lastEncoder;
 				}
 			}
@@ -450,9 +425,13 @@ class FramebufferUpdater implements Runnable {
 			
 			if (this.lastEncoder != null) {
 				
+				log.info(String.format("Selected encoder by client: '%s'.", this.lastEncoder.getClass().getSimpleName()));
+				
 				return this.lastEncoder;
 			}
 		}
+		
+		log.info(String.format("Selected fall-back encoder: '%s'.", RawEncoder.class.getSimpleName()));
 		
 		// Fall-back, raw encoder return. If all of above fails to return result.
 		return new RawEncoder();

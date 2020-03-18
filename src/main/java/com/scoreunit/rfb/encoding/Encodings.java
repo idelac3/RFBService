@@ -20,6 +20,11 @@ public class Encodings {
 			, RICH_CURSOR = -239;
 			;
 
+	private Encodings() {
+	
+		// No need for instance of this class.
+	}
+	
 	/**
 	 * Create new encoder for frame buffer.
 	 * 

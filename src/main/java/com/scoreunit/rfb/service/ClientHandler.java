@@ -83,7 +83,7 @@ class ClientHandler implements Runnable {
 	
 		if (this.config.getScreenClip() != null) {
 			
-			return this.config.getScreenClip().width;
+			return (short) this.config.getScreenClip().width;
 		}
 		
 		return (short) ScreenCapture.getScreenWidth();
@@ -98,7 +98,7 @@ class ClientHandler implements Runnable {
 	
 		if (this.config.getScreenClip() != null) {
 			
-			return this.config.getScreenClip().height;
+			return (short) this.config.getScreenClip().height;
 		}
 		
 		return (short) ScreenCapture.getScreenHeight();
@@ -234,7 +234,8 @@ class ClientHandler implements Runnable {
 				// Version 3.8, Last updated 26 November 2010
 				//
 				
-				final int SET_PIXEL_FORMAT = 0
+				final int EOF = -1
+						, SET_PIXEL_FORMAT = 0
 						, SET_ENCODINGS = 2
 						, FRAMEBUFFER_UPDATE_REQUEST = 3
 						, KEY_EVENT = 4
@@ -247,7 +248,11 @@ class ClientHandler implements Runnable {
 				
 				int msgType = in.read();
 				
-				if (msgType == SET_PIXEL_FORMAT) {
+				if (msgType == EOF) {
+					
+					break;					
+				}
+				else if (msgType == SET_PIXEL_FORMAT) {
 					
 					in.read(new byte[3]); // padding.
 					setPixelFormat = SetPixelFormat.read(in);

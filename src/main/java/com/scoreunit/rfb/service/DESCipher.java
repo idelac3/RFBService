@@ -35,6 +35,10 @@ class DESCipher {
 
 	public final static Logger log = LoggerFactory.getLogger(DESCipher.class);
 	
+	private DESCipher() {
+		// Don't create instance !
+	}
+	
 	/**
 	 * Perform encoding of original data.
 	 * 

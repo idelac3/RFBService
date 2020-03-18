@@ -53,10 +53,10 @@ public class RFBServiceExample {
 			
 			int beginIndex = 0, endIndex = clip.indexOf('x');
 			
-			short width = Short.parseShort(clip.substring(beginIndex, endIndex));
-			short height = Short.parseShort(clip.substring(endIndex + 1));
+			int width = Integer.parseInt(clip.substring(beginIndex, endIndex));
+			int height = Integer.parseInt(clip.substring(endIndex + 1));
 			
-			service.setScreenClip((short) 0, (short) 0, width, height);
+			service.setScreenClip(0, 0, width, height);
 		}
 		
 		if (connectTo != null) {
