@@ -12,9 +12,12 @@ import java.awt.datatransfer.Transferable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -210,9 +213,35 @@ public class ClientHandlerTest {
 		
 		final ClientHandler handler = new ClientHandler(socket, config);		
 		Future<?> future = executor.submit( handler );
-		future.get(1, TimeUnit.SECONDS);
+		
+		try {
+		
+			future.get(2, TimeUnit.SECONDS);
+		} catch (final TimeoutException ex) {
+		
+			ClientHandlerTest.printThreadStackTrace();
+		}
 		
 		assertTrue(handler.isRunning() == false);
+	}
+
+	public static void printThreadStackTrace() {
+		
+		final Map<Thread, StackTraceElement[]> map = Thread.getAllStackTraces();
+		
+		final PrintStream out = System.out;
+		
+		for (final Entry<Thread, StackTraceElement[]> entry : map.entrySet()) {
+			
+			out.println(entry.getKey().getName());
+			
+			for (final StackTraceElement el : entry.getValue()) {
+				
+				out.println(String.format("\t%s", el));
+			}
+			
+			out.println();
+		}		
 	}
 
 }

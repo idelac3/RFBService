@@ -112,23 +112,26 @@ public class RFBServiceTest {
 		
 		final ServerSocket client = new ServerSocket(clientPort);
 		final Future<String> future = executor.submit( () -> {
+
+			Socket socket = client.accept();
+
+			String retVal = null;
 			
 			try {
-				
-				Socket socket = client.accept();
 				
 				byte[] buf = new byte[12]; // RFB proto.version string. 
 				socket.getInputStream().read(buf);
 				
-				socket.close();
-				
-				return new String(buf);
+				retVal = new String(buf);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+
+				e.printStackTrace();				
+			}
+			finally {
+				socket.close();
 			}
 			
-			return null;
+			return retVal;
 		});
 		
 		final RFBService service = new RFBService();

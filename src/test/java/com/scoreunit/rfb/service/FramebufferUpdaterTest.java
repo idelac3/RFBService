@@ -48,7 +48,7 @@ public class FramebufferUpdaterTest {
 		
 		assertTrue(updater.isRunning());
 		
-		updater.setClientEncodings(new SetEncodings(new int[]{Encodings.RAW}));
+		updater.setClientEncodings(new SetEncodings(new int[]{Encodings.RAW, Encodings.RICH_CURSOR}));
 		updater.setPixelFormat(SetPixelFormat.default32bit());
 		updater.setPreferredEncodings(new int[]{Encodings.HEXTILE, Encodings.ZLIB, Encodings.RAW});
 		updater.setScreenClip(new ScreenClip((short) 0, (short) 0, (short) 640, (short) 480));

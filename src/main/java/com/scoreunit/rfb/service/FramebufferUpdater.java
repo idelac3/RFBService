@@ -263,6 +263,8 @@ class FramebufferUpdater implements Runnable {
 					this.framebufferUpdateLoading();
 
 					this.loadingState = false;
+					
+					// TimeUnit.SECONDS.sleep(4); // Give user few seconds to read welcome message.
 				}
 				else if (this.richCursorSent == false &&
 						this.pixelFormat.bitsPerPixel == 32) {
@@ -388,80 +390,8 @@ class FramebufferUpdater implements Runnable {
 	 */
 	private EncodingInterface selectEncoder() {
 		
-		// Reuse previously used encoder, if already set,
-		// and VNC client supports it.
-		if (this.lastEncoder != null && 
-				containsEncoding(this.lastEncoder.getType(), this.clientEncodings) == true) {
-			
-			return this.lastEncoder;
-		}
-		
-		// Use RFB service preferred encoding type list.
-		if (this.preferredEncodings != null) {
-						
-			// Look if some of preferred encodings is present in VNC client supported list.
-			for (int encoding : this.preferredEncodings) {
-				
-				if (containsEncoding(encoding, this.clientEncodings) == true) {
-					
-					this.lastEncoder = Encodings.newInstance((byte) encoding);
-					
-					if (this.lastEncoder == null) {
-						
-						this.lastEncoder = new RawEncoder();
-					}
-					
-					log.info(String.format("Selected preferred encoder: '%s'.", this.lastEncoder.getClass().getSimpleName()));
-					
-					return this.lastEncoder;
-				}
-			}
-		}
-		
-		// Finally, use client list of supported encoding types.
-		for (int encoding : this.clientEncodings) {
-
-			this.lastEncoder = Encodings.newInstance((byte) encoding);
-			
-			if (this.lastEncoder != null) {
-				
-				log.info(String.format("Selected encoder by client: '%s'.", this.lastEncoder.getClass().getSimpleName()));
-				
-				return this.lastEncoder;
-			}
-		}
-		
-		log.info(String.format("Selected fall-back encoder: '%s'.", RawEncoder.class.getSimpleName()));
-		
-		// Fall-back, raw encoder return. If all of above fails to return result.
-		return new RawEncoder();
-	}
-	
-	/**
-	 * Method will examine if list of encodings contain given encoding type.
-	 * 
-	 * @param type			-	desired encoding type to check if its in encoding list
-	 * @param encodings		-	encoding list
-	 * 
-	 * @return	true if encoding type is found in list
-	 */
-	private boolean containsEncoding(final int type, final int[] encodings) {
-	
-		if (encodings == null) {
-			
-			return false;
-		}
-		
-		for (int encodingType : encodings) {
-			
-			if (encodingType == type) {
-				
-				return true;
-			}
-		}
-		
-		return false;
-	}
+		return SelectEncoder.selectEncoder(this.lastEncoder, this.clientEncodings, this.preferredEncodings);
+	}	
 	
 	/**
 	 * A framebuffer update consists of a sequence of rectangles of pixel data which the client
@@ -535,7 +465,20 @@ class FramebufferUpdater implements Runnable {
 	 */
 	private void framebufferUpdateLoading() throws IOException {
 				
-		final TrueColorImage loadingImage = LoadingResource.get();
+		final int width, height;
+		
+		if (this.screenClip != null) {
+		
+			width  = this.screenClip.width;
+			height = this.screenClip.height;
+		}
+		else {
+			
+			width = ScreenCapture.getScreenWidth();
+			height = ScreenCapture.getScreenHeight();
+		}
+		
+		final TrueColorImage loadingImage = LoadingResource.get(width, height);
 		
 		final DataOutputStream dataOut = new DataOutputStream(this.out);
 		
@@ -546,9 +489,7 @@ class FramebufferUpdater implements Runnable {
 		
 		dataOut.writeShort(numberOfRectangles);
 			
-		short xPos = 0, yPos = 0
-			, width = (short) loadingImage.width
-			, height = (short) loadingImage.height; // For 'loading.png' image.
+		final short xPos = 0, yPos = 0;
 		
 		dataOut.writeShort(xPos);
 		dataOut.writeShort(yPos);

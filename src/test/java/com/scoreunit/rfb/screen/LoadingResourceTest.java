@@ -11,7 +11,10 @@ public class LoadingResourceTest {
 	@Test
 	public void test() throws IOException {
 		
-		assertNotNull(LoadingResource.get());
+		int w = ScreenCapture.getScreenWidth()
+				, h = ScreenCapture.getScreenHeight();
+		
+		assertNotNull(LoadingResource.get(w, h));
 	}
 
 }

@@ -1,17 +1,23 @@
 package com.scoreunit.rfb.service;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import javax.net.ssl.SSLServerSocketFactory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.scoreunit.rfb.encoding.Encodings;
 import com.scoreunit.rfb.screen.ScreenClip;
+import com.scoreunit.rfb.ssl.SSLUtil;
 
 /**
  * RFB service is Java implementation of VNC server.
@@ -111,6 +117,54 @@ public class RFBService implements Runnable {
 	public void setPreferredEncodings(final int[] encodings) {
 	
 		this.rfbConfig.setPreferredEncodings(encodings);
+	}
+	
+	/**
+	 * Enable SSL communication from provided <i>*.pfx</i> or <i>*.p12</i> file.
+	 * <p>
+	 * Note that this method should be invoked before TCP socket is already in listening mode,
+	 * eg. before {@link #start()} method, to take effect.
+	 *  
+	 * @param keyFilePath		-	path to PKCS12 key file which must contain private key and certificate
+	 * @param password			-	password protection set when key file was generated
+	 */
+	public void enableSSL(final String keyFilePath, final String password) {
+		
+		final String keystoreType;
+		
+		if (keyFilePath.endsWith(".pfx") || keyFilePath.endsWith(".p12")) {
+			
+			keystoreType = SSLUtil.KEYSTORE_TYPE_PKCS12;
+		}
+		else {
+			
+			keystoreType = SSLUtil.KEYSTORE_TYPE_JKS;
+		}
+		
+		try {
+		
+			final InputStream in = new FileInputStream(keyFilePath);
+		
+			final SSLServerSocketFactory factory = SSLUtil.newInstance(keystoreType, in, password);
+			this.rfbConfig.setSSLServerSocketFactory(factory);
+			
+			log.info("Default SSL cipher suite: " + Arrays.toString(factory.getDefaultCipherSuites()));
+			log.info("Supported SSL cipher suite: " + Arrays.toString(factory.getSupportedCipherSuites()));
+		} catch (final Exception ex) {
+			
+			log.error("Unable to initialize SSL encryption layer. SSL is disabled.", ex);
+		}
+	}
+
+	/**
+	 * Disable SSL communication with VNC clients.
+	 * <p>
+	 * Note that this method should be invoked before TCP socket is already in listening mode,
+	 * eg. before {@link #start()} method, to take effect. 
+	 */
+	public void disableSSL() {
+		
+		this.rfbConfig.setSSLServerSocketFactory(null);
 	}
 	
 	/**
@@ -231,7 +285,24 @@ public class RFBService implements Runnable {
 			
 			try {
 			
-				this.socket = new ServerSocket(this.port);
+				final SSLServerSocketFactory sslFactory = this.rfbConfig.getSSLServerSocketFactory();
+				
+				if (sslFactory != null) {
+					
+					//
+					// Secure TCP communication with SSL layer.
+					//
+					
+					this.socket = sslFactory.createServerSocket(this.port);
+				}
+				else {
+				
+					//
+					// Use plain TCP communication if SSL is not defined or not available.
+					//
+					
+					this.socket = new ServerSocket(this.port);
+				}
 				
 				log.info(
 						String.format("RFB service (VNC server) started at TCP port '%d'.",

@@ -83,8 +83,27 @@ public class HextileEncoder implements EncodingInterface {
 					out.write(subencodingMask);
 					
 					// Use pixel transform routing with pixel format provided. This covers case when
-					// VNC client requests 8-bit color mode, while source image is 32-bit color image.
-					out.writeInt(PixelTransform.transform(singlePixelValue, pixelFormat));
+					// VNC client requests 8-bit color mode, while source image is 32-bit color image.					
+					final byte bitsPerPixel = pixelFormat.bitsPerPixel;
+					
+					if (bitsPerPixel == 8) {
+					
+						out.writeByte(PixelTransform.transform(singlePixelValue, pixelFormat));
+					}
+					else if (bitsPerPixel == 16) {
+						
+						out.writeShort(PixelTransform.transform(singlePixelValue, pixelFormat));
+					}
+					else if (bitsPerPixel == 32) {
+						
+						out.writeInt(PixelTransform.transform(singlePixelValue, pixelFormat));
+					}
+					else {
+						
+						log.error("Unsupported bits per pixel value: " + bitsPerPixel);
+						
+						break;
+					}
 				}
 				else {
 					

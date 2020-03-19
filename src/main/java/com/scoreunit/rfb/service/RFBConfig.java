@@ -1,7 +1,11 @@
 package com.scoreunit.rfb.service;
 
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
+
 import com.scoreunit.rfb.encoding.Encodings;
 import com.scoreunit.rfb.screen.ScreenClip;
+import com.scoreunit.rfb.ssl.SSLUtil;
 
 /**
  * Configuration class, to carry some information
@@ -31,6 +35,16 @@ class RFBConfig {
 	 * If set, client encoding list will be ignored in favor of this list.
 	 */
 	private int[] preferredEncodings;
+	
+	/**
+	 * SSL server socket factory instance is used to create {@link SSLServerSocket}.
+	 * Instead of using plain {@link ServerSocket} and accept VNC clients,
+	 * it is possible to add SSL layer and encrypt packets between RFB service and VNC client.
+	 * <p>
+	 * See {@link SSLUtil#newInstance(String, java.io.InputStream, String)} method how to create
+	 * instance of {@link SSLServerSocketFactory}.
+	 */
+	private SSLServerSocketFactory sslServerSocketFactory;
 	
 	/**
 	 * If set, a password that VNC client must provide for authentication.
@@ -98,5 +112,29 @@ class RFBConfig {
 	public void setPreferredEncodings(int[] preferredEncodings) {
 		
 		this.preferredEncodings = preferredEncodings;
+	}
+
+	/**
+	 * Enable SSL secure layer, by providing instance of {@link SSLServerSocketFactory}.
+	 * <p>
+	 * Use helper method {@link SSLUtil#newInstance(String, java.io.InputStream, String)} to create {@link SSLServerSocketFactory}.
+	 * 
+	 * @param	sslServerSocketFactory		-	{@link SSLServerSocketFactory} instance, or null value if SSL communication should be turned off
+	 */
+	public void setSSLServerSocketFactory(final SSLServerSocketFactory sslServerSocketFactory) {
+		
+		this.sslServerSocketFactory = sslServerSocketFactory;
+	}
+	
+	/**
+	 * Check if this {@link RFBConfig} contains an instance of {@link SSLServerSocketFactory}.
+	 * <p>
+	 * If it contains, then secure communication using SSL layer.
+	 * 
+	 * @return null value if SSL is not desired, or {@link SSLServerSocketFactory} instance
+	 */
+	public SSLServerSocketFactory getSSLServerSocketFactory() {
+		
+		return this.sslServerSocketFactory;
 	}
 }

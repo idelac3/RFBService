@@ -19,6 +19,8 @@ public class RFBServiceExample {
 		final String connectTo = props.getProperty("connect");
 		final String clip = props.getProperty("clip");
 		final String password = props.getProperty("password");
+		final String sslKeyFilePath = props.getProperty("sslKeyFile");
+		final String sslKeyFilePassword = props.getProperty("sslKeyPass");
 		final String help = props.getProperty("help");
 		
 		final RFBService service = new RFBService();
@@ -33,6 +35,8 @@ public class RFBServiceExample {
 			out.println(String.format(" --connect [hostname:port] \n\t Establish connection to VNC client. Default TCP port is 5500.\n"));
 			out.println(String.format(" --clip [width+height] \n\t Share only part of screen. Eg. 800+600 to share 800x600 pixels of screen, at (0,0) pixel offset.\n"));
 			out.println(String.format(" --password [secret] \n\t Set VNC auth. When VNC client connects, it will have to provide correct password.\n"));
+			out.println(String.format(" --sslKeyFile [myKey.pfx] \n\t Set SSL secure layer.First generate key and certificate with openssl then bundle them into PKCS12 file (*.pfx).\n"));
+			out.println(String.format(" --sslKeyPass [password] \n\t A password used to generate PKCS12 file.\n"));
 			out.println("Author: igor.delac@gmail.com");
 			out.println();
 			
@@ -57,6 +61,11 @@ public class RFBServiceExample {
 			int height = Integer.parseInt(clip.substring(endIndex + 1));
 			
 			service.setScreenClip(0, 0, width, height);
+		}
+		
+		if (sslKeyFilePath != null && sslKeyFilePassword != null) {
+		
+			service.enableSSL(sslKeyFilePath, sslKeyFilePassword);
 		}
 		
 		if (connectTo != null) {
