@@ -36,6 +36,8 @@ class ClientHandler implements Runnable {
 	
 	private final RFBConfig config;
 	
+	private final MouseController mouseController;
+	
 	public ClientHandler(final Socket socket, final RFBConfig config) {
 		
 		this.socket = socket;
@@ -43,6 +45,8 @@ class ClientHandler implements Runnable {
 		this.running = false;
 		
 		this.config = config;
+		
+		this.mouseController = new MouseController();
 	}
 	
 	/**
@@ -281,25 +285,52 @@ class ClientHandler implements Runnable {
 					
 					final PointerEvent pointerEvent = PointerEvent.read(in);
 					
-					/*
-					 * Button mask:
-					 * 1 - left button
-					 * 2 - middle button
-					 * 4 - right button
-					 * 8 - wheel up
-					 * 16 - wheel down
-					 */
-					int buttonMask = pointerEvent.buttonMask;
-					
 					int x = pointerEvent.xPos;
 					int y = pointerEvent.yPos;
 					
-					switch (buttonMask) {
-					case 1: MouseController.mouseClick(x, y); break;
-					case 2: MouseController.mouseMiddleClick(x, y); break;
-					case 4: MouseController.mouseRightClick(x, y); break;
-					case 8: MouseController.mouseWheel(100); break;
-					case 16: MouseController.mouseWheel(-100); break;
+					this.mouseController.mouseMove(x, y);
+					
+					if (pointerEvent.isButtonPressed(PointerEvent.BUTTON1)) {
+					
+						// Button 1 pressed.
+						this.mouseController.mousePress(MouseController.BUTTON1);
+					}
+					else {
+						
+						// Button 1 released.
+						this.mouseController.mouseRelease(MouseController.BUTTON1);
+					}
+					
+					if (pointerEvent.isButtonPressed(PointerEvent.BUTTON2)) {
+						
+						// Button 2 pressed.
+						this.mouseController.mousePress(MouseController.BUTTON2);
+					}
+					else {
+						
+						// Button 2 released.
+						this.mouseController.mouseRelease(MouseController.BUTTON2);
+					}
+					
+					if (pointerEvent.isButtonPressed(PointerEvent.BUTTON3)) {
+						
+						// Button 3 pressed.
+						this.mouseController.mousePress(MouseController.BUTTON3);
+					}
+					else {
+						
+						// Button 3 released.
+						this.mouseController.mouseRelease(MouseController.BUTTON3);
+					}
+					
+					if (pointerEvent.isWheelDown()) {
+						
+						this.mouseController.mouseWheel(100);
+					}
+					
+					if (pointerEvent.isWheelUp()) {
+						
+						this.mouseController.mouseWheel(-100);
 					}
 				}
 				else if (msgType == CLIENT_CUT_TEXT) {

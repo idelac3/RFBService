@@ -14,9 +14,25 @@ import java.io.InputStream;
  *
  */
 class PointerEvent {
+
+	/**
+	 * Button mask constants, for {@link #isButtonPressed()} method.
+	 */
+	public static int BUTTON1 = 1, BUTTON2 = 2, BUTTON3 = 4;
 	
+	/**
+	 * Button mask bits for mouse wheel up and down pointer events.
+	 */
+	public static int WHEEL_UP = 8, WHEEL_DOWN = 16;
+	
+	/**
+	 * Access to raw button mask byte received in pointer message.
+	 */
 	public byte buttonMask;
 	
+	/**
+	 * Mouse coordinates received in pointer message.
+	 */
 	public short xPos, yPos;
 	
 	/**
@@ -32,6 +48,39 @@ class PointerEvent {
 		this.xPos = xPos;
 		this.yPos = yPos;
 		this.buttonMask = buttonMask;
+	}
+	
+	/**
+	 * Check if event contains a bit set indicating that mouse button is pressed.
+	 * If this function returns false, it means that mouse button is released.
+	 * 
+	 * @param button	-	one of {@link #BUTTON1}, {@link #BUTTON2}, etc.
+	 * 
+	 * @return	true if pointer event is received with button mask indicating that mouse button is pressed, otherwise false
+	 */
+	public boolean isButtonPressed(final int button) {
+		
+		return (buttonMask & button) == button;
+	}
+
+	/**
+	 * Check if this pointer event message contains a bit set indicating wheel up action request.
+	 * 
+	 * @return	true if user did wheel up button move
+	 */
+	public boolean isWheelUp() {
+		
+		return (buttonMask & WHEEL_UP) == WHEEL_UP;
+	}
+
+	/**
+	 * Check if this pointer event message contains a bit set indicating wheel down action request.
+	 * 
+	 * @return	true if user did wheel down button move
+	 */
+	public boolean isWheelDown() {
+		
+		return (buttonMask & WHEEL_DOWN) == WHEEL_DOWN;
 	}
 	
 	/**

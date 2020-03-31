@@ -2,8 +2,6 @@ package com.scoreunit.rfb.mouse;
 
 import static org.junit.Assert.*;
 
-import java.awt.event.InputEvent;
-
 import org.junit.Test;
 
 public class MouseControllerTest {
@@ -14,13 +12,10 @@ public class MouseControllerTest {
 		final MouseController controller = new MouseController();
 		assertNotNull(controller.toString());
 		
-		MouseController.mouseClick(0, 0);
-		MouseController.mouseMiddleClick(1, 1);
-		MouseController.mouseRightClick(0, 0);
-		MouseController.mouseMove(500, 500);
-		MouseController.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-		MouseController.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
-		MouseController.mouseWheel(100);
+		controller.mouseMove(0, 0);
+		controller.mousePress(MouseController.BUTTON1);
+		controller.mouseRelease(MouseController.BUTTON1);
+		controller.mouseWheel(100);
 	}
 
 }

@@ -390,7 +390,9 @@ class FramebufferUpdater implements Runnable {
 	 */
 	private EncodingInterface selectEncoder() {
 		
-		return SelectEncoder.selectEncoder(this.lastEncoder, this.clientEncodings, this.preferredEncodings);
+		this.lastEncoder = SelectEncoder.selectEncoder(this.lastEncoder, this.clientEncodings, this.preferredEncodings);
+		
+		return this.lastEncoder;
 	}	
 	
 	/**
@@ -416,6 +418,15 @@ class FramebufferUpdater implements Runnable {
 
 		// Find suitable encoder for frame buffer update response.
 		final EncodingInterface encoder = selectEncoder();
+		
+		// Indicator if VNC client needs full frame buffer data (screen image).
+		final boolean fullUpdate = (updateRequest.incremental == 0);
+		
+		if (fullUpdate == true) {
+
+			// This will enforce method getChangedTiles() to return list with complete screen image.
+			this.lastImage = null;
+		}
 		
 		//
 		// Take current image of screen,

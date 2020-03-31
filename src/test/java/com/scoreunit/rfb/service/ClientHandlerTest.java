@@ -20,9 +20,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -35,8 +32,6 @@ import com.scoreunit.rfb.screen.ScreenClip;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ClientHandlerTest {
-
-	private ExecutorService executor = Executors.newCachedThreadPool();
 
 	@Test
 	public void test_01_sessionWithVNCauth() throws IOException, InterruptedException, ExecutionException, TimeoutException {
@@ -68,7 +63,8 @@ public class ClientHandlerTest {
 
 		final CountDownLatch latch = new CountDownLatch(1);
 		
-		executor.submit( () -> {
+		// This task will simulate VNC client side.
+		final Runnable task = () -> {
 			
 			try {
 				
@@ -180,7 +176,10 @@ public class ClientHandlerTest {
 				out.flush();
 				
                 try {
-                    
+
+                	// Give some time to client handler thread to put data on clipboard.
+    				TimeUnit.MILLISECONDS.sleep(150);
+    				    
                     final Clipboard clipboard = 
                             Toolkit.getDefaultToolkit().getSystemClipboard();
                     final Transferable t = clipboard.getContents(null);
@@ -201,7 +200,10 @@ public class ClientHandlerTest {
 				
 				fail();
 			}
-		});
+		};
+		
+		final Thread vncClientThread = new Thread(task, "VNC-Client-1");
+		vncClientThread.start();
 		
 		latch.await(1, TimeUnit.SECONDS);
 		
@@ -211,13 +213,16 @@ public class ClientHandlerTest {
 		config.setPassword(password);
 		config.setScreenClip(clip);
 		
-		final ClientHandler handler = new ClientHandler(socket, config);		
-		Future<?> future = executor.submit( handler );
+		final ClientHandler handler = new ClientHandler(socket, config);
+		final Thread clientHandlerThread = new Thread(handler, "ClientHandler-1");
+		clientHandlerThread.start();
 		
 		try {
 		
-			future.get(2, TimeUnit.SECONDS);
-		} catch (final TimeoutException ex) {
+			// Max. 2 sec. wait for client handler and VNC client test threads to finish.			
+			clientHandlerThread.join(2000);
+			vncClientThread.join(2000);
+		} catch (final InterruptedException ex) {
 		
 			ClientHandlerTest.printThreadStackTrace();
 		}
