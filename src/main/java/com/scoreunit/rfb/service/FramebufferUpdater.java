@@ -267,7 +267,7 @@ class FramebufferUpdater implements Runnable {
 					// TimeUnit.SECONDS.sleep(4); // Give user few seconds to read welcome message.
 				}
 				else if (this.richCursorSent == false &&
-						this.pixelFormat.bitsPerPixel == 32) {
+						SelectEncoder.containsEncoding(Encodings.RICH_CURSOR, this.clientEncodings) == true) {
 					
 					//
 					// Here is routine to send rich cursor data, which is available if pixel format is set to 32-bit.
@@ -505,12 +505,12 @@ class FramebufferUpdater implements Runnable {
 		dataOut.writeShort(xPos);
 		dataOut.writeShort(yPos);
 		dataOut.writeShort(width);
-		dataOut.writeShort(height);
-		dataOut.writeInt(Encodings.RAW);
+		dataOut.writeShort(height);		
 			
-		final RawEncoder encoder = new RawEncoder();
+		this.lastEncoder = SelectEncoder.selectEncoder(this.lastEncoder, this.clientEncodings, this.preferredEncodings);
+		dataOut.writeInt(this.lastEncoder.getType());
 		
-		dataOut.write(encoder.encode(loadingImage.raw, loadingImage.width, loadingImage.height, this.pixelFormat));
+		dataOut.write(this.lastEncoder.encode(loadingImage.raw, loadingImage.width, loadingImage.height, this.pixelFormat));
 		
 		dataOut.flush();
 	}

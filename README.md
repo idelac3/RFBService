@@ -97,11 +97,11 @@ Table shows which VNC client programs have been used to test this library.
 
 | VNC Client      | Version               | Operating System | Encodings          | Result |
 | --------------- | --------------------- | ---------------- | ------------------ | ------ |
-| RealVNC Viewer  | 6.20.113 (r42314) x86 | Windows XP (x86) | Raw, hextile       | OK     |
-| TightVNC Viewer | 1.3.10.0 (x86)        | Windows XP (x86) | Raw, hextile, zlib | OK     |
-| UltraVNC Viewer | 1.2.4.0 (x86)         | Windows XP (x86) | Raw, hextile, zlib | OK     |
-| RealVNC Viewer  | 4.1.1 for X (amd86)   | Linux Mint (x64) | Raw, hextile       | OK     |
-| SSVNC   Viewer  | 1.0.29      (amd86)   | Linux Mint (x64) | Zlib               | OK     |
+| RealVNC Viewer  | 6.20.113 (r42314) x86 | Windows XP (x86) | raw, hextile       | OK     |
+| TightVNC Viewer | 1.3.10.0 (x86)        | Windows XP (x86) | raw, hextile, zlib | OK     |
+| UltraVNC Viewer | 1.2.4.0 (x86)         | Windows XP (x86) | raw, hextile, zlib | OK     |
+| RealVNC Viewer  | 4.1.1 for X (amd86)   | Linux Mint (x64) | raw, hextile       | OK     |
+| SSVNC   Viewer  | 1.0.29      (amd86)   | Linux Mint (x64) | zlib, tight        | OK     |
 
 
 Note that some combinations of colour depth, bits per pixel, etc. might not work well or will not work at all.

@@ -104,7 +104,7 @@ class SelectEncoder {
 	 * 
 	 * @return	true if encoding type is found in list
 	 */
-	private static boolean containsEncoding(final int type, final int[] encodings) {
+	public static boolean containsEncoding(final int type, final int[] encodings) {
 	
 		if (encodings == null) {
 			

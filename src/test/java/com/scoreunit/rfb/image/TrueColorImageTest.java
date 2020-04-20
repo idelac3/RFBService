@@ -2,6 +2,7 @@ package com.scoreunit.rfb.image;
 
 import static org.junit.Assert.*;
 
+import java.awt.image.BufferedImage;
 import java.util.Arrays;
 
 import org.junit.Test;
@@ -70,5 +71,47 @@ public class TrueColorImageTest {
 		final TrueColorImage img = new TrueColorImage(raw, width, height);
 
 		img.getPixel(width - 3, height + 3);
+	}
+	
+	@Test
+	public void test_04_convertToBufferedImage() {
+				
+		int width = 640, height = 480;
+		int size = width * height;
+		
+		int[] raw = new int[size];
+		Arrays.fill(raw, 1234);
+		
+		final TrueColorImage img = new TrueColorImage(raw, width, height);
+
+		final BufferedImage bufferedImage = TrueColorImage.toBufferedImage(img);
+		
+		assertEquals(bufferedImage.getWidth(), width);
+		assertEquals(bufferedImage.getHeight(), height);
+		
+		for (int w = 0 ; w < width ; w++) {
+			
+			for (int h = 0 ; h < height ; h++) {
+				
+				assertEquals(img.getPixel(w, h)
+						, bufferedImage.getRGB(w, h));
+			}
+		}
+	}
+	
+	@Test
+	public void test_04_convertToBGR() {
+		
+		int width = 1, height = 1;
+		int size = width * height;
+		
+		int[] raw = new int[size];
+		Arrays.fill(raw, 0x11223344);
+		
+		final TrueColorImage img = new TrueColorImage(raw, width, height);
+		
+		final byte[] bgr = TrueColorImage.toBGR(img);
+
+		assertArrayEquals(new byte[]{0x44, 0x33, 0x22}, bgr);
 	}
 }

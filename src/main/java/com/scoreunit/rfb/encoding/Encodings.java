@@ -1,5 +1,7 @@
 package com.scoreunit.rfb.encoding;
 
+import com.scoreunit.rfb.tight.TightEncoder;
+
 /**
  * 'The RFB Protocol' documentation, page 32,
  * by Tristan Richardson, RealVNC Ltd.
@@ -17,6 +19,7 @@ public class Encodings {
 			, HEXTILE = 5
 			, ZRLE = 16
 			, ZLIB = 6
+			, TIGHT = 7
 			, RICH_CURSOR = -239;
 			;
 
@@ -52,6 +55,11 @@ public class Encodings {
 		if (encodingType == RICH_CURSOR) {
 			
 			return new RichCursorEncoder();
+		}
+		
+		if (encodingType == TIGHT) {
+			
+			return new TightEncoder();
 		}
 		
 		return null;

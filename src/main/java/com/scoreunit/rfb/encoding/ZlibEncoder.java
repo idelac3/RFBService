@@ -25,7 +25,7 @@ public class ZlibEncoder implements EncodingInterface {
 
 	public final static Logger log = LoggerFactory.getLogger(ZlibEncoder.class);
 
-	private Deflater deflater;
+	final private Deflater deflater;
 
 	final private RawEncoder rawEncoder;
 
