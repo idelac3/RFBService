@@ -23,6 +23,7 @@ import com.scoreunit.rfb.encoding.Tile;
 import com.scoreunit.rfb.image.TrueColorImage;
 import com.scoreunit.rfb.screen.LoadingResource;
 import com.scoreunit.rfb.screen.ScreenCapture;
+import com.scoreunit.rfb.screen.ScreenCaptureInterface;
 import com.scoreunit.rfb.screen.ScreenClip;
 
 /**
@@ -136,6 +137,11 @@ class FramebufferUpdater implements Runnable {
 	private SetPixelFormat pixelFormat;
 	
 	/**
+	 * Instance of {@link ScreenCaptureInterface}, to capture image of screen or part of screen.
+	 */
+	private final ScreenCaptureInterface screenCapture;
+	
+	/**
 	 * Create new instance of updater.
 	 * 
 	 * @param clientHandler	-	reference to client handler
@@ -164,6 +170,8 @@ class FramebufferUpdater implements Runnable {
 		
 		// Default pixel format, 32-bit true image.
 		this.pixelFormat = SetPixelFormat.default32bit();
+		
+		this.screenCapture = new ScreenCapture();
 		
 		this.latch = new CountDownLatch(1);
 	}
@@ -323,11 +331,12 @@ class FramebufferUpdater implements Runnable {
 						, h = this.screenClip.height;
 
 				// Return region (clip) of screen image.
-				return ScreenCapture.getScreenshot(x, y, w, h);
+				return this.screenCapture.getScreenshot(x, y, w, h);
 			}
 
-			return ScreenCapture.getScreenshot();
-		} catch (final AWTException exception) {
+			// Return full screen image.
+			return this.screenCapture.getScreenshot();
+		} catch (final Exception exception) {
 
 			log.error("Unable to capture screen image.", exception);			
 		}
@@ -458,7 +467,7 @@ class FramebufferUpdater implements Runnable {
 			dataOut.writeShort(tile.height);
 			dataOut.writeInt(encoder.getType());
 			
-			final byte[] encodedImage = encoder.encode(tile.raw(), tile.width, tile.height, this.pixelFormat);
+			final byte[] encodedImage = encoder.encode(new TrueColorImage(tile.raw(), tile.width, tile.height), this.pixelFormat);
 			dataOut.write(encodedImage);
 		}
 		
@@ -485,8 +494,14 @@ class FramebufferUpdater implements Runnable {
 		}
 		else {
 			
-			width = ScreenCapture.getScreenWidth();
-			height = ScreenCapture.getScreenHeight();
+			width = this.screenCapture.getScreenWidth();
+			height = this.screenCapture.getScreenHeight();
+		}
+		
+		if (width == -1 || height == -1) {
+		
+			// Terminate here if screen dimension is not available.
+			return;
 		}
 		
 		final TrueColorImage loadingImage = LoadingResource.get(width, height);
@@ -496,21 +511,27 @@ class FramebufferUpdater implements Runnable {
 		dataOut.write(0); // FrameBufferUpdate message type.
 		dataOut.write(0); // Padding.
 		
-		short numberOfRectangles = 1;
+		final List<Tile> tiles = Tile.build(loadingImage);
+		
+		short numberOfRectangles = (short) tiles.size();
 		
 		dataOut.writeShort(numberOfRectangles);
 			
-		final short xPos = 0, yPos = 0;
-		
-		dataOut.writeShort(xPos);
-		dataOut.writeShort(yPos);
-		dataOut.writeShort(width);
-		dataOut.writeShort(height);		
+		for (final Tile tile : tiles) {
 			
-		this.lastEncoder = SelectEncoder.selectEncoder(this.lastEncoder, this.clientEncodings, this.preferredEncodings);
-		dataOut.writeInt(this.lastEncoder.getType());
-		
-		dataOut.write(this.lastEncoder.encode(loadingImage.raw, loadingImage.width, loadingImage.height, this.pixelFormat));
+			final short xPos = tile.xPos, yPos = tile.yPos
+					, tileWidth = tile.width, tileHeight = tile.height;
+			
+			dataOut.writeShort(xPos);
+			dataOut.writeShort(yPos);
+			dataOut.writeShort(tileWidth);
+			dataOut.writeShort(tileHeight);		
+				
+			this.lastEncoder = SelectEncoder.selectEncoder(this.lastEncoder, this.clientEncodings, this.preferredEncodings);
+			dataOut.writeInt(this.lastEncoder.getType());
+			
+			dataOut.write(this.lastEncoder.encode(new TrueColorImage(tile.raw(), tileWidth, tileHeight), this.pixelFormat));
+		}
 		
 		dataOut.flush();
 	}
@@ -526,7 +547,7 @@ class FramebufferUpdater implements Runnable {
 		
 		final RichCursorEncoder encoder = new RichCursorEncoder();
 		
-		final byte[] cursorData = encoder.encode(null, 0, 0, pixelFormat);
+		final byte[] cursorData = encoder.encode(null, pixelFormat);
 		
 		if (cursorData == null) {
 			

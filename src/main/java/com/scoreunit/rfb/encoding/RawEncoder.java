@@ -2,6 +2,7 @@ package com.scoreunit.rfb.encoding;
 
 import java.nio.ByteBuffer;
 
+import com.scoreunit.rfb.image.TrueColorImage;
 import com.scoreunit.rfb.service.SetPixelFormat;
 
 /**
@@ -19,24 +20,25 @@ public class RawEncoder implements EncodingInterface {
 	 * BGRA pixel compatible with most VNC client implementations.
 	 */
 	@Override
-	public byte[] encode(final int[] image
-			, final int width, final int height
-			, final SetPixelFormat pixelFormat) {
+	public byte[] encode(final TrueColorImage image, final SetPixelFormat pixelFormat) {
 
 		//
 		// Take pixel format information.
 		//
 		
+		final int imageLength = image.raw.length;
+		final int[] raw = image.raw;
+		
 		// Only bits per pixel are used here. Possible values are: 8, 16 or 32.
 		final byte bitsPerPixel = pixelFormat.bitsPerPixel;
 		
-		final byte[] result = new byte[bitsPerPixel / 8 * image.length];
+		final byte[] result = new byte[bitsPerPixel / 8 * imageLength];
 		
 		// No need to set byte order, since PixelTransform method will
 		// set proper order.
 		final ByteBuffer buffer = ByteBuffer.wrap(result);
 		
-		for (int pixel : image) {
+		for (int pixel : raw) {
 
 			// Build new pixel according to given pixel format.
 			int newPixel = PixelTransform.transform(pixel, pixelFormat);

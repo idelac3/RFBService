@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import com.scoreunit.rfb.keyboard.KeyboardController;
 import com.scoreunit.rfb.mouse.MouseController;
-import com.scoreunit.rfb.screen.ScreenCapture;
+import com.scoreunit.rfb.screen.ScreenClip;
 
 /**
  * This is socket handler that will handle client connection.
@@ -47,6 +47,11 @@ class ClientHandler implements Runnable {
 		this.config = config;
 		
 		this.mouseController = new MouseController();
+		
+		if (this.config.getScreenClip() == null) {
+			
+			this.config.setScreenClip(new ScreenClip());
+		}
 	}
 	
 	/**
@@ -84,13 +89,8 @@ class ClientHandler implements Runnable {
 	 * @return	width of screen, or region of screen that is presented to VNC client
 	 */
 	private short getWidth() {
-	
-		if (this.config.getScreenClip() != null) {
 			
-			return (short) this.config.getScreenClip().width;
-		}
-		
-		return (short) ScreenCapture.getScreenWidth();
+		return (short) this.config.getScreenClip().width;
 	}
 	
 	/**
@@ -99,13 +99,8 @@ class ClientHandler implements Runnable {
 	 * @return	height of screen, or region of screen that is presented to VNC client
 	 */
 	private short getHeight() {
-	
-		if (this.config.getScreenClip() != null) {
-			
-			return (short) this.config.getScreenClip().height;
-		}
-		
-		return (short) ScreenCapture.getScreenHeight();
+
+		return (short) this.config.getScreenClip().height;
 	}
 	
 	@Override

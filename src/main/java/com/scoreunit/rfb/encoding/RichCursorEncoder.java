@@ -7,6 +7,7 @@ import java.io.InputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.scoreunit.rfb.image.TrueColorImage;
 import com.scoreunit.rfb.screen.LoadingResource;
 import com.scoreunit.rfb.service.SetPixelFormat;
 
@@ -29,7 +30,7 @@ public class RichCursorEncoder implements EncodingInterface {
 	 * Return cursor pixels and bitmask, or null value if resource files are not on class path.
 	 */
 	@Override
-	public byte[] encode(int[] image, int width, int height, SetPixelFormat pixelFormat) {
+	public byte[] encode(final TrueColorImage image, SetPixelFormat pixelFormat) {
 		
 		try {
 			

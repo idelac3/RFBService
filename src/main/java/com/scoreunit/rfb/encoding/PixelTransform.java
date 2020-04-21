@@ -34,8 +34,8 @@ public class PixelTransform {
 		// Read desired pixel format.
 		//
 		
-		byte bitsPerPixel = pixelFormat.bitsPerPixel, depth = pixelFormat.depth;		
-		byte bigEndianFlag = pixelFormat.bigEndianFlag, trueColorFlag = pixelFormat.trueColorFlag;
+		byte bitsPerPixel = pixelFormat.bitsPerPixel;		
+		byte bigEndianFlag = pixelFormat.bigEndianFlag;
 		
 		short redMax = pixelFormat.redMax, greenMax = pixelFormat.greenMax, blueMax = pixelFormat.blueMax;
 		byte redShift = pixelFormat.redShift, greenShift = pixelFormat.greenShift, blueShift = pixelFormat.blueShift;

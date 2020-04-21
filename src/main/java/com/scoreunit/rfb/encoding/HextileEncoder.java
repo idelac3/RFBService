@@ -8,6 +8,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.scoreunit.rfb.image.TrueColorImage;
 import com.scoreunit.rfb.service.SetPixelFormat;
 
 /**
@@ -61,9 +62,9 @@ public class HextileEncoder implements EncodingInterface {
 	 * 
 	 */
 	@Override
-	public byte[] encode(final int[] image, final int width, final int height, final SetPixelFormat pixelFormat) {
+	public byte[] encode(final TrueColorImage image, final SetPixelFormat pixelFormat) {
 
-		final List<Tile> tiles = Tile.build(image, width, height);
+		final List<Tile> tiles = Tile.build(image);
 
 		final ByteArrayOutputStream bOut = new ByteArrayOutputStream();
 		final DataOutputStream out = new DataOutputStream(bOut);
@@ -111,7 +112,7 @@ public class HextileEncoder implements EncodingInterface {
 					
 					// If tile contains more colours, then use raw encoding of tile. 
 					out.write(subencodingMask);
-					out.write(rawEncoder.encode(tile.raw(), tile.width, tile.height, pixelFormat));
+					out.write(rawEncoder.encode(new TrueColorImage(tile.raw(), tile.width, tile.height), pixelFormat));
 				}
 			}
 			catch (final IOException ex) {

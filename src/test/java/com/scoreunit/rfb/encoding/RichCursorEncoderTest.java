@@ -1,6 +1,7 @@
 package com.scoreunit.rfb.encoding;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
 
@@ -15,11 +16,9 @@ public class RichCursorEncoderTest {
 		final RichCursorEncoder encoder = new RichCursorEncoder();
 		assertEquals(Encodings.RICH_CURSOR, encoder.getType());
 		
-		int[] image = null;
-		int width = 0, height = 0;
 		SetPixelFormat pixelFormat = SetPixelFormat.default32bit();
 		
-		assertNotNull(encoder.encode(image, width, height, pixelFormat));
+		assertNotNull(encoder.encode(null, pixelFormat));
 	}
 
 }

@@ -1,5 +1,6 @@
 package com.scoreunit.rfb.screen;
 
+import java.awt.AWTError;
 import java.awt.AWTException;
 import java.awt.Dimension;
 import java.awt.Rectangle;
@@ -30,29 +31,61 @@ import com.scoreunit.rfb.image.TrueColorImage;
  * @author igor.delac@gmail.com
  *
  */
-public class ScreenCapture {
+public class ScreenCapture implements ScreenCaptureInterface {
 	
 	public final static Logger log = LoggerFactory.getLogger(ScreenCapture.class);
 	
 	/**
+	 * Used to get screen dimension.
+	 */
+	private Toolkit toolkit;
+	
+	/**
+	 * Used to capture image of screen or part of screen.
+	 */
+	private Robot robot;
+	
+	public ScreenCapture() {
+	
+		try {
+			
+			this.toolkit = Toolkit.getDefaultToolkit();
+			this.robot = new Robot();
+		}
+		catch (final AWTError | AWTException error) {
+			
+			log.error("Unable to initialize AWT Toolkit.", error);
+			
+			this.toolkit = null;
+			this.robot = null;
+		}
+	}
+	
+	/**
 	 * This method will fill image buffer with part of screen.
 	 * Buffer is always filled with ARGB values (32-bit).
+	 * <p>
+	 * Position <i>(x, y)</i> always start from top-left corner of screen.
 	 * 
-	 * @param x upper left value
-	 * @param y upper left value
-	 * @param width width in pixel
-	 * @param height height in pixel
+	 * @param x			-	horizontal value
+	 * @param y			-	vertical value
+	 * @param width		-	width in pixel
+	 * @param height	-	height in pixel
 	 * 
 	 * @return	{@link TrueColorImage} which contains array of int's representing pixels of current screen, or part of screen
 	 * 
 	 * @throws AWTException	if running in headless mode, eg. without X11, or any display 
 	 */
-	public static TrueColorImage getScreenshot(int x, int y, int width, int height) throws AWTException {
-	
-		final Robot robot = new Robot();
+	@Override
+	public TrueColorImage getScreenshot(int x, int y, int width, int height) throws AWTException {	
+		
+		if (this.robot == null) {
+			
+			throw new AWTError("AWT not available on this system.");
+		}
 		
 		final Rectangle screenRect = new Rectangle(x, y, width, height);
-		final BufferedImage colorImage = robot.createScreenCapture(screenRect);
+		final BufferedImage colorImage = this.robot.createScreenCapture(screenRect);
 
 	    final int[] colorImageBuffer = ((DataBufferInt) colorImage.getRaster().getDataBuffer()).getData();
 
@@ -67,7 +100,8 @@ public class ScreenCapture {
 	 * 
 	 * @throws AWTException	if running in headless mode, eg. without X11, or any display 
 	 */
-	public static TrueColorImage getScreenshot() throws AWTException {
+	@Override
+	public TrueColorImage getScreenshot() throws AWTException {
 		
 		final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		
@@ -77,9 +111,15 @@ public class ScreenCapture {
 	/**
 	 * Width of screen.
 	 * 
-	 * @return width in pixel
+	 * @return width in pixel, or -1 if AWT {@link Toolkit.getDefaultToolkit()} is not available
 	 */
-	public static int getScreenWidth() {
+	@Override
+	public int getScreenWidth() {
+		
+		if (this.toolkit == null) {
+			
+			return -1;
+		}
 		
 		final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		
@@ -89,11 +129,17 @@ public class ScreenCapture {
 	/**
 	 * Screen height.
 	 * 
-	 * @return height in pixel
+	 * @return height in pixel, or -1 if AWT {@link Toolkit.getDefaultToolkit()} is not available
 	 */
-	public static int getScreenHeight() {
+	@Override
+	public int getScreenHeight() {
 		
-		final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		if (this.toolkit == null) {
+			
+			return -1;
+		}
+		
+		final Dimension screenSize = this.toolkit.getScreenSize();
 		
 		return screenSize.height;
 	}

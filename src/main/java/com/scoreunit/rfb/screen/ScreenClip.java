@@ -22,16 +22,23 @@ public class ScreenClip {
 	 * and dimension <i>(width, height)</i>, all in pixel. 
 	 */
 	public final int xPos, yPos, width, height;
-
+	
+	/**
+	 * Used to measure correct screen width and height.
+	 */
+	private final ScreenCaptureInterface screenCapture;
+	
 	/**
 	 * Create default screen clip, which is full screen size and offset is set to (0, 0).
 	 */
 	public ScreenClip() {
 		
+		this.screenCapture = new ScreenCapture();
+		
 		this.xPos = 0;
 		this.yPos = 0;
-		this.width = ScreenCapture.getScreenWidth();
-		this.height = ScreenCapture.getScreenHeight();		
+		this.width = screenCapture.getScreenWidth();
+		this.height = screenCapture.getScreenHeight();		
 	}
 	
 	/**
@@ -43,7 +50,9 @@ public class ScreenClip {
 	 * @param height	-	height, dimension <i>(width, height)</i>, in pixel
 	 */
 	public ScreenClip(final int xPos, final int yPos, final int width, final int height) {
-
+		
+		this.screenCapture = new ScreenCapture();
+	
 		if (validate(xPos, yPos, width, height) == true) {
 			
 			this.xPos = xPos;
@@ -56,8 +65,8 @@ public class ScreenClip {
 		
 		this.xPos = 0;
 		this.yPos = 0;
-		this.width = ScreenCapture.getScreenWidth();
-		this.height = ScreenCapture.getScreenHeight();
+		this.width = screenCapture.getScreenWidth();
+		this.height = screenCapture.getScreenHeight();
 	}
 
 	/**
@@ -78,50 +87,50 @@ public class ScreenClip {
 		//  available screen image.
 		//
 		
-		if (xPos < 0 || xPos > ScreenCapture.getScreenWidth()) {
+		if (xPos < 0 || xPos > this.screenCapture.getScreenWidth()) {
 			
 			log.error(String.format("Screen clip (x ,y) offset is set to wrong value: ('%d', '%d'). Screen size is: ('%d', '%d')."
-					, xPos, yPos, ScreenCapture.getScreenWidth(), ScreenCapture.getScreenHeight()));
+					, xPos, yPos, this.screenCapture.getScreenWidth(), this.screenCapture.getScreenHeight()));
 			
 			return false;
 		}
 		
-		if (yPos < 0 || yPos > ScreenCapture.getScreenHeight()) {
+		if (yPos < 0 || yPos > this.screenCapture.getScreenHeight()) {
 			
 			log.error(String.format("Screen clip (x ,y) offset is set to wrong value: ('%d', '%d'). Screen size is: ('%d', '%d')."
-					, xPos, yPos, ScreenCapture.getScreenWidth(), ScreenCapture.getScreenHeight()));
+					, xPos, yPos, this.screenCapture.getScreenWidth(), this.screenCapture.getScreenHeight()));
 			
 			return false;
 		}
 		
-		if (width < 0 || width > ScreenCapture.getScreenWidth()) {
+		if (width < 0 || width > this.screenCapture.getScreenWidth()) {
 			
 			log.error(String.format("Screen clip dimension (width, height) is set to wrong value: ('%d', '%d'). Screen size is: ('%d', '%d')."
-					, width, height, ScreenCapture.getScreenWidth(), ScreenCapture.getScreenHeight()));
+					, width, height, this.screenCapture.getScreenWidth(), this.screenCapture.getScreenHeight()));
 			
 			return false;
 		}
 		
-		if (height < 0 || height > ScreenCapture.getScreenHeight()) {
+		if (height < 0 || height > this.screenCapture.getScreenHeight()) {
 			
 			log.error(String.format("Screen clip dimension (width, height) is set to wrong value: ('%d', '%d'). Screen size is: ('%d', '%d')."
-					, width, height, ScreenCapture.getScreenWidth(), ScreenCapture.getScreenHeight()));
+					, width, height, this.screenCapture.getScreenWidth(), this.screenCapture.getScreenHeight()));
 			
 			return false;
 		}
 		
-		if (xPos + width > ScreenCapture.getScreenWidth()) {
+		if (xPos + width > this.screenCapture.getScreenWidth()) {
 		
 			log.error(String.format("Screen clip dimension (width, height) is set to wrong value: ('%d', '%d'). Screen size is: ('%d', '%d')."
-					, width, height, ScreenCapture.getScreenWidth(), ScreenCapture.getScreenHeight()));
+					, width, height, this.screenCapture.getScreenWidth(), this.screenCapture.getScreenHeight()));
 			
 			return false;
 		}
 
-		if (yPos + height > ScreenCapture.getScreenHeight()) {
+		if (yPos + height > this.screenCapture.getScreenHeight()) {
 			
 			log.error(String.format("Screen clip dimension (width, height) is set to wrong value: ('%d', '%d'). Screen size is: ('%d', '%d')."
-					, width, height, ScreenCapture.getScreenWidth(), ScreenCapture.getScreenHeight()));
+					, width, height, this.screenCapture.getScreenWidth(), this.screenCapture.getScreenHeight()));
 			
 			return false;
 		}

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.scoreunit.rfb.image.TrueColorImage;
+
 /**
  * Holds 16x16 pixel part of image.
  * <p>
@@ -89,6 +91,18 @@ public class Tile {
 	public String toString() {
 		
 		return String.format("%s-[%d-%d]", Tile.class.getSimpleName(), this.xPos, this.yPos);
+	}
+
+	/**
+	 * Divide image into tiles.
+	 * 
+	 * @param image		-	{@link TrueColorImage} instance
+	 * 
+	 * @return	list of {@link Tile}s
+	 */
+	public static List<Tile> build(final TrueColorImage image) {
+		
+		return Tile.build(image.raw, image.width, image.height);
 	}
 	
 	/**

@@ -21,6 +21,12 @@ import com.scoreunit.rfb.image.TrueColorImage;
 public class LoadingResource {
 	
 	/**
+	 * Name of file in class path from which to load some text do display as intro screen
+	 * when VNC client connects.
+	 */
+	public static String RESOURCE_FILENAME = "git.properties";
+	
+	/**
 	 * Generate image from resource text file.
 	 * 
 	 * @param width		-	desired width of image, should be either {@link ScreenCapture#getScreenWidth()} or {@link ScreenClip#width}
@@ -31,15 +37,13 @@ public class LoadingResource {
 	 * @throws IOException	if resource file 'loading.png' is not on class path
 	 */
 	public static TrueColorImage get(final int width, final int height) throws IOException {
-		
-		final String resourceFilename = "git.properties";
-		
+
 		final InputStream inputStream = 
-				LoadingResource.class.getClassLoader().getResourceAsStream(resourceFilename);
+				LoadingResource.class.getClassLoader().getResourceAsStream(RESOURCE_FILENAME);
 		
 		if (inputStream == null) {
 			
-			throw new IOException("Resource '" + resourceFilename + "' not found on class path.");
+			throw new IOException("Resource '" + RESOURCE_FILENAME + "' not found on class path.");
 		}
 		
 		final BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);

@@ -177,16 +177,32 @@ public class ClientHandlerTest {
 				
                 try {
 
-                	// Give some time to client handler thread to put data on clipboard.
-    				TimeUnit.MILLISECONDS.sleep(150);
-    				    
-                    final Clipboard clipboard = 
-                            Toolkit.getDefaultToolkit().getSystemClipboard();
-                    final Transferable t = clipboard.getContents(null);
-                    // assertTrue( t.isDataFlavorSupported(DataFlavor.stringFlavor) == true);
-                                        
-                    String result = String.valueOf(t.getTransferData(DataFlavor.stringFlavor));
-                    assertEquals("abcde", result);
+                	//
+                	// Check that Clipboard contains "abcde" string.
+                	//
+                	
+                	long startedAt = System.currentTimeMillis();
+                	
+                	String result = null;
+                	
+                	// Here we need to check more than once, since data might not end in Clipboard immediately.
+                	while (System.currentTimeMillis() - startedAt < 2000) { // Max. 2 sec. iterate.
+	    				    
+	                    final Clipboard clipboard = 
+	                            Toolkit.getDefaultToolkit().getSystemClipboard();
+	                    
+	                    final Transferable tranferable = clipboard.getContents(null);
+	                                        
+	                    result = String.valueOf(tranferable.getTransferData(DataFlavor.stringFlavor));
+	                    
+	                    if ("abcde".equals(result) == true) {
+	                    	
+	                    	// Stop loop if expected result has arrived.
+	                    	break;
+	                    }
+                	}
+                	
+                	assertEquals("abcde", result);
                 }
                 catch (final Exception ex) {
                     

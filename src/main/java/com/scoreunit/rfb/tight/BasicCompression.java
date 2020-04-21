@@ -34,8 +34,7 @@ class BasicCompression {
 		this.rawEncoder = new RawEncoder();
 	}
 	
-	public byte[] encode(final int[] image, final int width, final int height
-			, final SetPixelFormat pixelFormat) {
+	public byte[] encode(final TrueColorImage image, final SetPixelFormat pixelFormat) {
 		
 		final ByteArrayOutputStream bOut = new ByteArrayOutputStream();
 		
@@ -63,13 +62,13 @@ class BasicCompression {
 		
 			// As per description ( https://github.com/rfbproto/rfbproto/blob/master/rfbproto.rst#tight-encoding ),
 			// convert PIXEL into TPIXEL (ARGB --> BGR). Reduce 1 byte for each pixel.
-			raw = TrueColorImage.toBGR(new TrueColorImage(image, width, height));			
+			raw = TrueColorImage.toBGR(image);			
 		}
 		else {
 			
 			// Let RAW encoder convert 32-bit ARGB image of screen into appropriate
 			// raw bytes according to pixel format information.
-			raw = rawEncoder.encode(image, width, height, pixelFormat);
+			raw = rawEncoder.encode(image, pixelFormat);
 		}
 		
 		deflater.setInput(raw);

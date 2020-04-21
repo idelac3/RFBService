@@ -2,12 +2,17 @@ package com.scoreunit.rfb.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -21,6 +26,7 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
+import com.scoreunit.rfb.encoding.Encodings;
 import com.scoreunit.rfb.screen.ScreenClip;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -52,6 +58,8 @@ public class RFBServiceTest {
 		service.setScreenClip(new ScreenClip((short) 1, (short) 2, (short) 3, (short) 4));
 		
 		service.setPassword("blabla123");
+		
+		service.setPreferredEncodings(new int[] {Encodings.RAW, Encodings.ZLIB});
 	}
 	
 	@Test
@@ -141,6 +149,65 @@ public class RFBServiceTest {
 		assertEquals(ProtocolVersion.ver, result);
 		
 		client.close();
+	}
+	
+	@Test
+	public void test_04_sslConfiguration() throws IOException, TimeoutException {
+	
+		final RFBService service = new RFBService();
+		
+		// By default, SSL is not configured.
+		assertFalse(service.isSSLEnabled());
+		
+		// Bad config. with non-existing key file.
+		service.enableSSL("blabla.pfx", "123456");
+		assertFalse(service.isSSLEnabled());
+				
+		final String[] resourceFileNames = {
+				"store-example1.jks", "key-example1.pfx"
+		};
+		
+		final String password = "blabla123";
+	
+		// Test with both *.pfx and *.jks files.
+		for (final String resourceFileName : resourceFileNames) {
+			
+			//
+			// Copy resource file data into temp. folder.
+			//
+			
+			final InputStream in = RFBServiceTest.class.getClassLoader().getResourceAsStream(resourceFileName);
+			assertNotNull(in);
+			
+			final String tmpKeyFile = Paths.get(System.getProperty("java.io.tmpdir"), resourceFileName).toString(); 
+			final FileOutputStream fOut = new FileOutputStream(tmpKeyFile);
+			
+			final byte[] buffer = new byte[1024];
+			int len;
+						
+			while ( (len = in.read(buffer)) > 0) {
+			
+				fOut.write(buffer, 0, len);
+			}
+			
+			fOut.close();
+			
+			service.enableSSL(tmpKeyFile, password);
+			assertTrue(service.isSSLEnabled());
+			
+			service.start();
+			waitFor(TIMEOUT, (x) -> service.isRunning() );
+			assertTrue(service.isRunning());
+			
+			service.terminate();
+			waitFor(TIMEOUT, (x) -> service.isRunning() == false);
+			assertFalse(service.isRunning());
+			
+			service.disableSSL();
+			assertFalse(service.isSSLEnabled());
+			
+			Files.delete(Paths.get(tmpKeyFile));
+		}
 	}
 	
 	/**

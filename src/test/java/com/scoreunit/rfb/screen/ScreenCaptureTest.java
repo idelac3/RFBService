@@ -1,8 +1,7 @@
 package com.scoreunit.rfb.screen;
 
-import static org.junit.Assert.*;
-
-import java.awt.AWTException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -11,39 +10,46 @@ import com.scoreunit.rfb.image.TrueColorImage;
 public class ScreenCaptureTest {
 
 	@Test
-	public void test_01_screenCapture() {
+	public void test_01_screenCapture() throws Exception {
 		
-		assertTrue( ScreenCapture.getScreenHeight() > 0 );
-		assertTrue( ScreenCapture.getScreenWidth() > 0 );
+		final ScreenCaptureInterface screenCapture = new ScreenCapture();
+		
+		assertTrue( screenCapture.getScreenHeight() > 0 );
+		assertTrue( screenCapture.getScreenWidth() > 0 );
 		
 		int x = 320, y = 320, width = 240, height = 240;
-		
-		try {
-		
-			final TrueColorImage img = ScreenCapture.getScreenshot(x, y, width, height);
-			
-			final int[] raw = img.raw;
-			assertEquals(width * height, raw.length);
-		} catch (final AWTException ex) {
-			
-		}
+
+		final TrueColorImage img = screenCapture.getScreenshot(x, y, width, height);
+
+		final int[] raw = img.raw;
+		assertEquals(width * height, raw.length);
 	}
 	
 	@Test
-	public void test_02_screenDimension() {
+	public void test_02_screenCaptureFullScreen() throws Exception {
 		
-		assertTrue( ScreenCapture.getScreenHeight() > 0 );
-		assertTrue( ScreenCapture.getScreenWidth() > 0 );
+		final ScreenCaptureInterface screenCapture = new ScreenCapture();
 		
-		try {
+		int width = screenCapture.getScreenWidth(), height = screenCapture.getScreenHeight();
+
+		final TrueColorImage img = screenCapture.getScreenshot();
+
+		final int[] raw = img.raw;
+		assertEquals(width * height, raw.length);
+	}
+	
+	@Test
+	public void test_03_screenDimension() throws Exception {
 		
-			final TrueColorImage img = ScreenCapture.getScreenshot();
-			
-			assertEquals(ScreenCapture.getScreenHeight(), img.height);
-			assertEquals(ScreenCapture.getScreenWidth(), img.width);
-		} catch (final AWTException ex) {
-			
-		}
+		final ScreenCaptureInterface screenCapture = new ScreenCapture();
+		
+		assertTrue( screenCapture.getScreenHeight() > 0 );
+		assertTrue( screenCapture.getScreenWidth() > 0 );
+
+		final TrueColorImage img = screenCapture.getScreenshot();
+
+		assertEquals(screenCapture.getScreenHeight(), img.height);
+		assertEquals(screenCapture.getScreenWidth(), img.width);
 	}
 
 }

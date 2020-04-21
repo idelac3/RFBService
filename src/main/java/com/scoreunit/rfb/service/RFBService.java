@@ -168,6 +168,16 @@ public class RFBService implements Runnable {
 	}
 	
 	/**
+	 * Check if SSL is configured and enabled.
+	 * 
+	 * @return	true is SSL is properly configured
+	 */
+	public boolean isSSLEnabled() {
+		
+		return this.rfbConfig.getSSLServerSocketFactory() != null;
+	}
+	
+	/**
 	 * Check if it's running.
 	 * 
 	 * @return	true if RFB service is running

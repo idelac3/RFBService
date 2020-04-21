@@ -6,6 +6,7 @@ import java.util.zip.Deflater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.scoreunit.rfb.image.TrueColorImage;
 import com.scoreunit.rfb.service.SetPixelFormat;
 
 /**
@@ -44,9 +45,9 @@ public class ZlibEncoder implements EncodingInterface {
 	 * Zlib will just compress raw encoded image.
 	 */
 	@Override
-	public byte[] encode(final int[] image, final int width, final int height, final SetPixelFormat pixelFormat) {
+	public byte[] encode(final TrueColorImage image, final SetPixelFormat pixelFormat) {
 
-		final byte[] raw = rawEncoder.encode(image, width, height, pixelFormat);
+		final byte[] raw = rawEncoder.encode(image, pixelFormat);
 		deflater.setInput(raw);
 		
 		final byte[] buff = new byte[2 * raw.length];

@@ -27,8 +27,7 @@ class JpegCompression {
 
 	}
 	
-	public byte[] encode(final int[] image, final int width, final int height
-			, final SetPixelFormat pixelFormat) {
+	public byte[] encode(final TrueColorImage image, final SetPixelFormat pixelFormat) {
 		
 		final ByteArrayOutputStream bOut = new ByteArrayOutputStream();
 		
@@ -41,26 +40,12 @@ class JpegCompression {
 		bOut.write(compressionControl);
 		
 		final ByteArrayOutputStream jpgOut = new ByteArrayOutputStream();
-/*		
-		final BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-		final int[] array = ((DataBufferInt) bufferedImage.getRaster().getDataBuffer()).getData();
-		System.arraycopy(image, 0, array, 0, array.length);
-		
-		final BufferedImage bufferedImage1 = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
-		bufferedImage1.createGraphics().drawImage(bufferedImage, 0, 0, new ImageObserver() {
 
-			@Override
-			public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
-				// TODO Auto-generated method stub
-				return false;
-			}
-		});
-*/		
 		try {
 		
-			final byte[] bgr = TrueColorImage.toBGR(new TrueColorImage(image, width, height));
+			final byte[] bgr = TrueColorImage.toBGR(image);
 			
-			final BufferedImage bgrBufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
+			final BufferedImage bgrBufferedImage = new BufferedImage(image.width, image.height, BufferedImage.TYPE_3BYTE_BGR);
 			final byte[] rasterArray = ((DataBufferByte) bgrBufferedImage.getRaster().getDataBuffer()).getData();
 			System.arraycopy(bgr, 0, rasterArray, 0, rasterArray.length);
 			

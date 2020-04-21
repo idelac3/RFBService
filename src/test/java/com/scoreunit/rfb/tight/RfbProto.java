@@ -539,11 +539,6 @@ class RfbProto {
 
 		numUpdatesInSession = 0;
 
-		// FIXME: If there were e.g. ZRLE updates only, that should not
-		// affect recording of Zlib and Tight updates. So, actually
-		// we should maintain separate flags for Zlib, ZRLE and
-		// Tight, instead of one ``wereZlibUpdates'' variable.
-		//
 		if (wereZlibUpdates)
 			recordFromBeginning = false;
 
@@ -646,15 +641,15 @@ class RfbProto {
 	int readCompactLen() throws IOException {
 		int[] portion = new int[3];
 		portion[0] = readU8();
-		int byteCount = 1;
+
 		int len = portion[0] & 0x7F;
 		if ((portion[0] & 0x80) != 0) {
 			portion[1] = readU8();
-			byteCount++;
+
 			len |= (portion[1] & 0x7F) << 7;
 			if ((portion[1] & 0x80) != 0) {
 				portion[2] = readU8();
-				byteCount++;
+
 				len |= (portion[2] & 0xFF) << 14;
 			}
 		}
@@ -1155,7 +1150,6 @@ class RfbProto {
 		return is.available();
 	}
 
-	// FIXME: DataInputStream::skipBytes() is not guaranteed to skip
 	// exactly n bytes. Probably we don't want to use this method.
 	final int skipBytes(int n) throws IOException {
 		int r = is.skipBytes(n);

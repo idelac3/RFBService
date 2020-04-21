@@ -137,7 +137,9 @@ public class ScreenClipTest {
 	@Test
 	public void test_10_bad_OffsetX_Width() {
 		
-		final int xPos = ScreenCapture.getScreenWidth() / 2, yPos = 0, width = ScreenCapture.getScreenWidth(), height = ScreenCapture.getScreenHeight();
+		final ScreenCaptureInterface screenCapture = new ScreenCapture();
+		
+		final int xPos = screenCapture.getScreenWidth() / 2, yPos = 0, width = screenCapture.getScreenWidth(), height = screenCapture.getScreenHeight();
 		
 		final ScreenClip clip = new ScreenClip(xPos, yPos, width, height);
 		
@@ -149,7 +151,9 @@ public class ScreenClipTest {
 	@Test
 	public void test_10_bad_OffsetY_Height() {
 		
-		final int xPos = 0, yPos = ScreenCapture.getScreenHeight() / 2, width = ScreenCapture.getScreenWidth(), height = ScreenCapture.getScreenHeight();
+		final ScreenCaptureInterface screenCapture = new ScreenCapture();
+		
+		final int xPos = 0, yPos = screenCapture.getScreenHeight() / 2, width = screenCapture.getScreenWidth(), height = screenCapture.getScreenHeight();
 		
 		final ScreenClip clip = new ScreenClip(xPos, yPos, width, height);
 		

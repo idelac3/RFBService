@@ -9,6 +9,7 @@ import java.util.zip.Inflater;
 
 import org.junit.Test;
 
+import com.scoreunit.rfb.image.TrueColorImage;
 import com.scoreunit.rfb.service.SetPixelFormat;
 
 public class ZlibEncoderTest {
@@ -33,7 +34,7 @@ public class ZlibEncoderTest {
 		
 		final SetPixelFormat pixelFormat = SetPixelFormat.default32bit();
 		
-		final byte[] encodedImage = encoder.encode(image, width, height, pixelFormat);
+		final byte[] encodedImage = encoder.encode(new TrueColorImage(image, width, height), pixelFormat);
 		
 		// Try to decode and compare with original.
 		final byte[] decodedImage = new byte[size * 4];

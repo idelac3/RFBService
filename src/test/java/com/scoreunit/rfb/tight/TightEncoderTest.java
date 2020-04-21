@@ -14,6 +14,8 @@ import javax.imageio.ImageIO;
 
 import org.junit.Test;
 
+import com.scoreunit.rfb.encoding.Encodings;
+import com.scoreunit.rfb.image.TrueColorImage;
 import com.scoreunit.rfb.service.SetPixelFormat;
 
 public class TightEncoderTest {
@@ -25,14 +27,14 @@ public class TightEncoderTest {
 		
 		final int width = 640, height = 480;
 		
-		final int[] image = new int[width * height];
+		final int[] raw = new int[width * height];
 		
 		final TightEncoder encoder = new TightEncoder();
 		
-		final byte[] encodedData = encoder.encode(image, width, height, pixelFormat);
+		final byte[] encodedData = encoder.encode(new TrueColorImage(raw, width, height), pixelFormat);
 		
 		int[] decodedImage = decode(encodedData, width, height, 4); // since we use SetPixelFormat with 32-bit image.
-		assertEquals(image.length, decodedImage.length);
+		assertEquals(raw.length, decodedImage.length);
 	}
 
 	@Test
@@ -51,14 +53,22 @@ public class TightEncoderTest {
 		
 		final int width = 640, height = 480;
 		
-		final int[] image = new int[width * height];
+		final int[] raw = new int[width * height];
 		
 		final TightEncoder encoder = new TightEncoder();
 		
-		final byte[] encodedData = encoder.encode(image, width, height, pixelFormat);
+		final byte[] encodedData = encoder.encode(new TrueColorImage(raw, width, height), pixelFormat);
 		
 		int[] decodedImage = decode(encodedData, width, height, 1); // since we use SetPixelFormat with 8-bit image.
-		assertEquals(image.length, decodedImage.length);
+		assertEquals(raw.length, decodedImage.length);
+	}
+	
+	@Test
+	public void test_03_getType() throws Exception {
+	
+		final TightEncoder encoder = new TightEncoder();
+		
+		assertEquals(Encodings.TIGHT, encoder.getType());
 	}
 	
 	/**

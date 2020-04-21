@@ -9,7 +9,12 @@ public class EncodingsTest {
 	@Test
 	public void test_01_newInstance() {
 		
-		final int[] encodings = {Encodings.RAW, Encodings.HEXTILE, Encodings.ZLIB, Encodings.RICH_CURSOR};
+		final int[] encodings = { Encodings.RAW
+				, Encodings.HEXTILE
+				, Encodings.ZLIB
+				, Encodings.RICH_CURSOR
+				, Encodings.TIGHT
+				};
 		
 		for (final int encodingType : encodings) {
 		
