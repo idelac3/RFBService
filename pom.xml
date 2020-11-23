@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.scoreunit.rfb</groupId>
 	<artifactId>service</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>0.0.3-SNAPSHOT</version>
 	<name>rfbservice</name>
 	<description>Java implementation of RFB server side (VNC service) with basic support for raw, hextile and zlib encoding</description>
 
@@ -38,7 +38,8 @@
 				<version>${maven-shade-plugin.version}</version>
 				<executions>
 					<execution>
-						<phase>package</phase>
+						<!-- <phase>package</phase> -->
+                        <phase>none</phase>
 						<goals>
 							<goal>shade</goal>
 						</goals>
@@ -99,6 +100,7 @@
 			<plugin>
 				<groupId>pl.project13.maven</groupId>
 				<artifactId>git-commit-id-plugin</artifactId>
+                <version>4.0.3</version>
 				<executions>
 					<execution>
 						<id>get-the-git-infos</id>
