@@ -344,6 +344,12 @@ class ClientHandler implements Runnable {
 						log.error("Unable to copy to clipboard text.", ex);
 					}
 				}
+				else {
+					
+					log.error("Unknown VNC client message type received: " + msgType);
+					
+					break;
+				}
 			}			
 			
 			in.close();

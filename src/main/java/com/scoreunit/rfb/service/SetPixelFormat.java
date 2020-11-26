@@ -1,6 +1,9 @@
 package com.scoreunit.rfb.service;
 
+import java.awt.AWTError;
+import java.awt.HeadlessException;
 import java.awt.Toolkit;
+import java.awt.image.ColorModel;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -64,7 +67,7 @@ public class SetPixelFormat {
 	 */
 	public SetPixelFormat() {
 		
-		this.bitsPerPixel = (byte) Toolkit.getDefaultToolkit().getColorModel().getPixelSize();
+		this.bitsPerPixel = SetPixelFormat.getBitsPerPixel();
 		this.depth = bitsPerPixel;
 		this.bigEndianFlag = 0;
 		this.trueColorFlag = 1;
@@ -105,6 +108,14 @@ public class SetPixelFormat {
 		}
 	}
 	
+	/**
+	 * An convenience method to write {@link SetPixelFormat} message to {@link OutputStream}.
+	 * 
+	 * @param outputStream	-	destination {@link OutputStream} where to write message
+	 * @param message		-	{@link SetPixelFormat} message
+	 * 
+	 * @throws IOException	if I/O problem occurs
+	 */
 	public static void write(final OutputStream outputStream, final SetPixelFormat message) throws IOException {
 		
 		final DataOutputStream out = new DataOutputStream(outputStream);
@@ -122,6 +133,14 @@ public class SetPixelFormat {
 		out.write(new byte[]{0, 0, 0}); // Padding.		
 	}
 	
+	/**
+	 * Read pixel format message from input stream.
+	 * 
+	 * @param inputStream	-	{@link InputStream} instance
+	 * @return	{@link SetPixelFormat} message
+	 * 
+	 * @throws IOException	if reading fails due to I/O problem
+	 */
 	public static SetPixelFormat read(final InputStream inputStream) throws IOException {
 		
 		final DataInputStream in = new DataInputStream(inputStream);
@@ -146,6 +165,11 @@ public class SetPixelFormat {
 		return setPixelFormat;
 	}
 
+	/**
+	 * Default pixel format, used by most modern desktop systems.
+	 * 
+	 * @return	32-bit pixel format, true color, with RGB color ordering
+	 */
 	public static SetPixelFormat default32bit() {
 
 		return new SetPixelFormat(
@@ -156,5 +180,27 @@ public class SetPixelFormat {
 				, (short) 255, (short) 255, (short) 255	// red, green, blue max.
 				, (byte) 16, (byte) 8, (byte) 0	// red, green, blue shift.
 				);
+	}
+	
+	/**
+	 * Get screen pixel size on host system.
+	 * 
+	 * @return	should return one of values <i>8, 16, 24</i> or <i>32</i>	
+	 */
+	public static byte getBitsPerPixel() {
+		
+		try {
+			
+			final Toolkit kit = Toolkit.getDefaultToolkit();
+			final ColorModel colorModel = kit.getColorModel();
+			
+			return Integer.valueOf(colorModel.getPixelSize()).byteValue();
+		}
+		catch (final AWTError | HeadlessException headlessError) {
+			
+			// Some systems might not report correct color mode, 
+			//  so this value should work in most cases.
+			return 32;
+		}
 	}
 }

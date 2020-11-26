@@ -60,9 +60,9 @@ public class SecurityTypes {
 	 * Read client protocol version string value.
 	 * 
 	 * @param in			-	instance of {@link InputStream} used to read, typically obtained from {@link Socket#getInputStream()} method
-	 * @return	instance of {@link SecurityTypes} object with values stored in {@link major} and {@link #minor} members
+	 * @return	instance of {@link SecurityTypes} object 
 	 * 
-	 * @throws IOException	if version string probided by client does not look right, see {@link #ver} how value should look
+	 * @throws IOException	if I/O error occurs
 	 */
 	public static SecurityTypes read(final InputStream in) throws IOException {
 				

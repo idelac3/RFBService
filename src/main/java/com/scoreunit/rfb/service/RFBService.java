@@ -251,7 +251,7 @@ public class RFBService implements Runnable {
 	 * @param port		-	TCP port value on which VNC client is listening
 	 * 
 	 * @throws IOException		if VNC client is unreachable  
-	 * @throws UnknownHostException 
+	 * @throws UnknownHostException if connection fails because of wrong hostname and/or TCP port value
 	 */
 	public void connect(final String hostname, final int port) throws UnknownHostException, IOException {
 		

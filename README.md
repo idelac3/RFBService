@@ -102,6 +102,7 @@ Table shows which VNC client programs have been used to test this library.
 | UltraVNC Viewer | 1.2.4.0 (x86)         | Windows XP (x86) | raw, hextile, zlib | OK     |
 | RealVNC Viewer  | 4.1.1 for X (amd86)   | Linux Mint (x64) | raw, hextile       | OK     |
 | SSVNC   Viewer  | 1.0.29      (amd86)   | Linux Mint (x64) | zlib, tight        | OK     |
+| noVNC JS client | 1.2.0                 | V8.8.5.210.26    | tight              | OK     |
 
 
 Note that some combinations of colour depth, bits per pixel, etc. might not work well or will not work at all.

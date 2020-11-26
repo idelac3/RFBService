@@ -33,6 +33,8 @@ public class VNCAuth {
 	
 	/**
 	 * Create new VNC auth.
+	 * 
+	 * @param password	-	provided password by VNC viewer
 	 */
 	public VNCAuth(final String password) {
 		
@@ -74,7 +76,7 @@ public class VNCAuth {
 	 * 
 	 * @param in			-	instance of {@link InputStream} used to read, typically obtained from {@link Socket#getInputStream()} method
 	 * 
-	 * @throws IOException	if version string provided by client does not look right, see {@link #ver} how value should look
+	 * @throws IOException	if I/O error occurs
 	 */
 	public void readChallenge(final InputStream in) throws IOException {
 				

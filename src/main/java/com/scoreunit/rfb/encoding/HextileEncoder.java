@@ -58,7 +58,6 @@ public class HextileEncoder implements EncodingInterface {
 	 * simply divide image into hex. tiles (16x16 pixel),
 	 * and write them continuously from upper left to bottom right,
 	 * in order.
-	 * <p>
 	 * 
 	 */
 	@Override

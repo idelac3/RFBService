@@ -5,10 +5,10 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
 import com.scoreunit.rfb.image.TrueColorImage;
 
 /**
@@ -46,12 +46,29 @@ public class LoadingResource {
 			throw new IOException("Resource '" + RESOURCE_FILENAME + "' not found on class path.");
 		}
 		
+		return get(width, height, inputStream);
+	}
+	
+	/**
+	 * Generate image from text provided in form of {@link InputStream}.
+	 * 
+	 * @param width		-	desired width of image, should be either {@link ScreenCapture#getScreenWidth()} or {@link ScreenClip#width}
+	 * @param height	-	desired height of image, should be either {@link ScreenCapture#getScreenHeight()} or {@link ScreenClip#height}
+	 * 
+	 * @param in	-	impl. of {@link InputStream}, eg. {@link ByteArrayInputStream} containing some multi-line ASCII text to display
+	 * 
+	 * @return	image raw data, ARGB pixel format
+	 * 
+	 * @throws IOException	if I/O problem occurs while reading data from input stream
+	 */
+	public static TrueColorImage get(final int width, final int height, final InputStream in) throws IOException {
+		
 		final BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 
 		final Graphics2D graphics = newImage.createGraphics();
 		graphics.setFont(new Font(Font.MONOSPACED, Font.PLAIN, Double.valueOf(1.35f * graphics.getFont().getSize()).intValue()));
 		
-		final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+		final BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 		String line;
 		int offset = 10, increment = graphics.getFontMetrics().getHeight() + 3;
 		while ( (line = reader.readLine()) != null) {
@@ -64,6 +81,6 @@ public class LoadingResource {
 		
 	    final int[] colorImageBuffer = ((DataBufferInt) newImage.getRaster().getDataBuffer()).getData();
 
-	    return new TrueColorImage(colorImageBuffer, newImage.getWidth(), newImage.getHeight());
+	    return new TrueColorImage(colorImageBuffer, newImage.getWidth(), newImage.getHeight());		
 	}
 }

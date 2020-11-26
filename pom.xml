@@ -1,9 +1,10 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.scoreunit.rfb</groupId>
 	<artifactId>service</artifactId>
-	<version>0.0.3-SNAPSHOT</version>
+	<version>0.0.4-SNAPSHOT</version>
 	<name>rfbservice</name>
 	<description>Java implementation of RFB server side (VNC service) with basic support for raw, hextile and zlib encoding</description>
 
@@ -31,7 +32,21 @@
 
 	<build>
 		<plugins>
-
+		
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.2.0</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
@@ -39,7 +54,7 @@
 				<executions>
 					<execution>
 						<!-- <phase>package</phase> -->
-                        <phase>none</phase>
+						<phase>none</phase> <!-- plugin disabled -->
 						<goals>
 							<goal>shade</goal>
 						</goals>
@@ -59,7 +74,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.2</version>
+				<version>0.8.5</version>
 				<executions>
 					<execution>
 						<id>prepare-agent</id>
@@ -100,7 +115,7 @@
 			<plugin>
 				<groupId>pl.project13.maven</groupId>
 				<artifactId>git-commit-id-plugin</artifactId>
-                <version>4.0.3</version>
+				<version>4.0.3</version>
 				<executions>
 					<execution>
 						<id>get-the-git-infos</id>

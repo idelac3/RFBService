@@ -20,7 +20,7 @@ public class ClientInit {
 	 * disconnecting all other clients.
 	 * <p>
 	 * 
-	 * @param sharedDesktop
+	 * @param sharedDesktop	-	flag is set to 1 if other VNC client connections should be left 
 	 */
 	public ClientInit(final boolean sharedDesktop) {
 		
@@ -31,7 +31,7 @@ public class ClientInit {
 	 * Read client protocol version string value.
 	 * 
 	 * @param in			-	instance of {@link InputStream} used to read, typically obtained from {@link Socket#getInputStream()} method
-	 * @return	instance of {@link ClientInit} object with values stored in {@link major} and {@link #minor} members
+	 * @return	instance of {@link ClientInit} object
 	 * 
 	 * @throws IOException	if reading fails
 	 */

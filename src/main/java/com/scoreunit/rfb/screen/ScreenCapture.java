@@ -8,6 +8,8 @@ import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +36,12 @@ import com.scoreunit.rfb.image.TrueColorImage;
 public class ScreenCapture implements ScreenCaptureInterface {
 	
 	public final static Logger log = LoggerFactory.getLogger(ScreenCapture.class);
+	
+	/**
+	 * A default width and height in pixel if AWT toolkit is unavailable on host system,
+	 * or headless mode is on.
+	 */
+	public final static int DEFAULT_WIDTH = 800, DEFAULT_HEIGHT = 600;
 	
 	/**
 	 * Used to get screen dimension.
@@ -81,7 +89,15 @@ public class ScreenCapture implements ScreenCaptureInterface {
 		
 		if (this.robot == null) {
 			
-			throw new AWTError("AWT not available on this system.");
+			try {
+			
+				// Try to provide at least visual indicator that host system is unable to capture screen image.
+				return LoadingResource.get(DEFAULT_WIDTH, DEFAULT_HEIGHT
+						, new ByteArrayInputStream("AWT unavailable. Check if headless mode is off and graphics is available on host system.".getBytes()));
+			} catch (IOException e) {
+			
+				throw new AWTException(e.getMessage());
+			}
 		}
 		
 		final Rectangle screenRect = new Rectangle(x, y, width, height);
@@ -111,14 +127,14 @@ public class ScreenCapture implements ScreenCaptureInterface {
 	/**
 	 * Width of screen.
 	 * 
-	 * @return width in pixel, or -1 if AWT {@link Toolkit.getDefaultToolkit()} is not available
+	 * @return width in pixel, or {@link #DEFAULT_WIDTH} if AWT {@link Toolkit#getDefaultToolkit()} is not available
 	 */
 	@Override
 	public int getScreenWidth() {
 		
 		if (this.toolkit == null) {
 			
-			return -1;
+			return DEFAULT_WIDTH;
 		}
 		
 		final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -129,14 +145,14 @@ public class ScreenCapture implements ScreenCaptureInterface {
 	/**
 	 * Screen height.
 	 * 
-	 * @return height in pixel, or -1 if AWT {@link Toolkit.getDefaultToolkit()} is not available
+	 * @return height in pixel, or or {@link #DEFAULT_HEIGHT}  if AWT {@link Toolkit#getDefaultToolkit()} is not available
 	 */
 	@Override
 	public int getScreenHeight() {
 		
 		if (this.toolkit == null) {
 			
-			return -1;
+			return DEFAULT_HEIGHT;
 		}
 		
 		final Dimension screenSize = this.toolkit.getScreenSize();
