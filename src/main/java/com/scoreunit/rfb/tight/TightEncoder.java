@@ -19,7 +19,10 @@ public class TightEncoder implements EncodingInterface {
 	private final BasicCompression basicCompression;
 	
 	private final JpegCompression jpegCompression;
-	
+
+	/**
+	 * New Tight encoder.
+	 */
 	public TightEncoder() {
 	
 		this.basicCompression = new BasicCompression();

@@ -23,7 +23,10 @@ import com.scoreunit.rfb.service.SetPixelFormat;
  *
  */
 public class RichCursorEncoder implements EncodingInterface {
-	
+
+	/**
+	 * Default {@link Logger} instance.
+	 */
 	public final static Logger log = LoggerFactory.getLogger(RichCursorEncoder.class);
 	
 	/**

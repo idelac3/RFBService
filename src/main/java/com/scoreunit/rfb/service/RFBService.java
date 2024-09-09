@@ -32,8 +32,14 @@ import com.scoreunit.rfb.ssl.SSLUtil;
  */
 public class RFBService implements Runnable {
 
+	/**
+	 * Default {@link Logger} instance.
+	 */
 	public final static Logger log = LoggerFactory.getLogger(RFBService.class);
-	
+
+	/**
+	 * Default, starting, TCP port for RFB / VNC server(s).
+	 */
 	public final static int DEFAULT_PORT = 5900;
 
 	private int port;

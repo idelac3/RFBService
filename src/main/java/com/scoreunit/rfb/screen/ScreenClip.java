@@ -14,7 +14,10 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class ScreenClip {
-	
+
+	/**
+	 * Default {@link Logger} instance.
+	 */
 	public final static Logger log = LoggerFactory.getLogger(ScreenClip.class);
 
 	/**

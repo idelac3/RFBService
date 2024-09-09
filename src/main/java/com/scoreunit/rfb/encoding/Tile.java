@@ -24,7 +24,10 @@ public class Tile {
 	 * Currently tiles are limited to 16x16 pixel.
 	 */
 	public final short width = 16, height = 16;
-	
+
+	/**
+	 * (x, y) position of the tile, taken from the main image.
+	 */
 	public final short xPos, yPos;
 	
 	/**

@@ -13,6 +13,9 @@ import com.scoreunit.rfb.tight.TightEncoder;
  */
 public class Encodings {
 
+	/**
+	 * List of encoding types.
+	 */
 	public static final int RAW = 0
 			, COPY_RECT = 1
 			, RRE = 2

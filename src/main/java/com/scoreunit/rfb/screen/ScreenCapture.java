@@ -18,7 +18,7 @@ import com.scoreunit.rfb.image.TrueColorImage;
 
 /**
  * Java routines to capture current screen.
- * <p>
+ * <br>
  * Note that on 32-bit true color systems,
  * image of screen is usually in the following byte order:
  * <pre>
@@ -28,13 +28,17 @@ import com.scoreunit.rfb.image.TrueColorImage;
  * <pre>
  * [B G R 0]
  * </pre>
- * <p>
+ * This implementation use AWT library.
+ *
  * 
  * @author igor.delac@gmail.com
  *
  */
 public class ScreenCapture implements ScreenCaptureInterface {
-	
+
+	/**
+	 * Default {@link Logger} instance.
+	 */
 	public final static Logger log = LoggerFactory.getLogger(ScreenCapture.class);
 	
 	/**
@@ -52,7 +56,10 @@ public class ScreenCapture implements ScreenCaptureInterface {
 	 * Used to capture image of screen or part of screen.
 	 */
 	private Robot robot;
-	
+
+	/**
+	 * New screen capture instance.
+	 */
 	public ScreenCapture() {
 	
 		try {

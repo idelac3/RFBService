@@ -4,6 +4,11 @@ import java.awt.image.BufferedImage;
 
 import com.scoreunit.rfb.image.TrueColorImage;
 
+/**
+ * This is interface to implement various screen capture methods.
+ *
+ * The default is to use AWT toolkit that should be available in most JRE / JDK installations.
+ */
 public interface ScreenCaptureInterface {
 
 	/**

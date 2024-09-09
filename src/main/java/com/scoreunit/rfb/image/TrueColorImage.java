@@ -17,15 +17,21 @@ import com.scoreunit.rfb.screen.ScreenCapture;
  * byte order is {@link ByteOrder#LITTLE_ENDIAN}, and when encoding image
  * for VNC client, byte order should be {@link ByteOrder#BIG_ENDIAN}.
  * See {@link RawEncoder} how to switch byte order.
- * <p>
+ * </p>
  * 
  * @author igor.delac@gmail.com
  *
  */
 public class TrueColorImage {
 
+	/**
+	 * Raw access to image pixels.
+	 */
 	public final int[] raw;
-	
+
+	/**
+	 * Image dimensions.
+	 */
 	public final int width, height;
 	
 	/**

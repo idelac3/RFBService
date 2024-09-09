@@ -11,7 +11,7 @@ import com.scoreunit.rfb.service.SetPixelFormat;
  * <p>
  * Note that source image is usually 32-bit ARGB image with
  * little-endian byte order ({@link ByteOrder#LITTLE_ENDIAN}).
- * <p>
+ * </p>
  * 
  * @author igor.delac@gmail.com
  *

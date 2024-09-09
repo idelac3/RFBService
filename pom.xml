@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.scoreunit.rfb</groupId>
 	<artifactId>service</artifactId>
-	<version>0.0.4-SNAPSHOT</version>
+	<version>0.0.5</version>
 	<name>rfbservice</name>
 	<description>Java implementation of RFB server side (VNC service) with basic support for raw, hextile and zlib encoding</description>
 
@@ -19,12 +19,12 @@
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
-			<version>1.2.3</version>
+			<version>1.4.14</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.12</version>
+			<version>4.13.2</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -36,7 +36,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.2.0</version>
+				<version>3.6.3</version>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>
@@ -74,7 +74,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.5</version>
+				<version>0.8.11</version>
 				<executions>
 					<execution>
 						<id>prepare-agent</id>
@@ -104,11 +104,11 @@
 						</configuration>
 					</execution>
 				</executions>
-				<configuration>
-					<systemPropertyVariables>
-						<jacoco-agent.destfile>target/jacoco.exec</jacoco-agent.destfile>
-					</systemPropertyVariables>
-				</configuration>
+<!--				<configuration>-->
+<!--					<systemPropertyVariables>-->
+<!--						<jacoco-agent.destfile>target/jacoco.exec</jacoco-agent.destfile>-->
+<!--					</systemPropertyVariables>-->
+<!--				</configuration>-->
 			</plugin>
 
 			<!-- Git-commit-ID plugin maintains application version file -->

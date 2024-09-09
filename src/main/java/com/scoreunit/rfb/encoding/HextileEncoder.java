@@ -27,7 +27,10 @@ import com.scoreunit.rfb.service.SetPixelFormat;
  *
  */
 public class HextileEncoder implements EncodingInterface {
-	
+
+	/**
+	 * Default {@link Logger} instance.
+	 */
 	public final static Logger log = LoggerFactory.getLogger(HextileEncoder.class);
 	
 	/**
@@ -47,7 +50,10 @@ public class HextileEncoder implements EncodingInterface {
 			;
 	
 	private final RawEncoder rawEncoder;
-	
+
+	/**
+	 * New Hextile encoder.
+	 */
 	public HextileEncoder() {
 		
 		this.rawEncoder = new RawEncoder();

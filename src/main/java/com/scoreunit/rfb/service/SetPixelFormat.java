@@ -21,10 +21,19 @@ import java.io.OutputStream;
  */
 public class SetPixelFormat {
 
+	/**
+	 * Bits per pixel, depth, big-endina byte order, true color.
+	 */
 	public byte bitsPerPixel, depth, bigEndianFlag, trueColorFlag;
-	
+
+	/**
+	 * RGB max. values.
+	 */
 	public short redMax, greenMax, blueMax;
-	
+
+	/**
+	 * RGB value shift.
+	 */
 	public byte redShift, greenShift, blueShift;
 
 	/**

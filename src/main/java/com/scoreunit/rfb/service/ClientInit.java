@@ -9,17 +9,20 @@ import java.net.Socket;
  * by Tristan Richardson, RealVNC Ltd.
  * <p>
  * Version 3.8, Last updated 26 November 2010
+ * </p>
  */
 public class ClientInit {
 
+	/**
+	 * Flag that tells if we must share image with more RFB clients.
+	 */
 	public final boolean sharedDesktop;
 	
 	/**
 	 * Shared-flag is non-zero (true) if the server should try to share the desktop by leaving
 	 * other clients connected, zero (false) if it should give exclusive access to this client by
 	 * disconnecting all other clients.
-	 * <p>
-	 * 
+	 *
 	 * @param sharedDesktop	-	flag is set to 1 if other VNC client connections should be left 
 	 */
 	public ClientInit(final boolean sharedDesktop) {

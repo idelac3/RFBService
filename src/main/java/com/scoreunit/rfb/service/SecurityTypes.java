@@ -17,6 +17,9 @@ import java.net.Socket;
  */
 public class SecurityTypes {
 
+	/**
+	 * The RFB message codes for secure type auth.
+	 */
 	public final static int NONE = 1
 			, VNC_AUTH = 2;
 	

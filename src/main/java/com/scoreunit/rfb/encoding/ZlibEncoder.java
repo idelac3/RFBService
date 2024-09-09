@@ -24,6 +24,9 @@ import com.scoreunit.rfb.service.SetPixelFormat;
  */
 public class ZlibEncoder implements EncodingInterface {
 
+	/**
+	 * Default {@link Logger} instance.
+	 */
 	public final static Logger log = LoggerFactory.getLogger(ZlibEncoder.class);
 
 	final private Deflater deflater;

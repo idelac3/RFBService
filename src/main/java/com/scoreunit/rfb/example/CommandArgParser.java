@@ -32,7 +32,12 @@ public class CommandArgParser {
 	 *  to indicate that argument is given on command line.  
 	 */
 	final Properties map;
-	
+
+	/**
+	 * Construct new command arg. parser.
+	 *
+	 * @param args	list of program arguments
+	 */
 	public CommandArgParser(final String[] args) {
 	
 		this.map = new Properties();

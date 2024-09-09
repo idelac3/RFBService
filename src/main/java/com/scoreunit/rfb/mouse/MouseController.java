@@ -19,7 +19,10 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class MouseController {
-	
+
+	/**
+	 * Default {@link Logger} instance.
+	 */
 	public final static Logger log = LoggerFactory.getLogger(MouseController.class);
 	
 	/**
@@ -31,7 +34,10 @@ public class MouseController {
 			, BUTTON3 = InputEvent.BUTTON3_DOWN_MASK;
 	
 	private Robot robot;
-	
+
+	/**
+	 * New mouse controller.
+	 */
 	public MouseController() {
 			
 		try {

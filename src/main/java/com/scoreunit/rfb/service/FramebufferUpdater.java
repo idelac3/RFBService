@@ -1,15 +1,14 @@
 package com.scoreunit.rfb.service;
 
 import java.awt.AWTException;
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.Objects;
+import java.util.concurrent.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -140,7 +139,13 @@ class FramebufferUpdater implements Runnable {
 	 * Instance of {@link ScreenCaptureInterface}, to capture image of screen or part of screen.
 	 */
 	private final ScreenCaptureInterface screenCapture;
-	
+
+	/**
+	 * This can speed up the encoding of the changed part of the screen,
+	 * by forcing encoding using more CPU cores.
+	 */
+	private final ExecutorService executor;
+
 	/**
 	 * Create new instance of updater.
 	 * 
@@ -174,6 +179,8 @@ class FramebufferUpdater implements Runnable {
 		this.screenCapture = new ScreenCapture();
 		
 		this.latch = new CountDownLatch(1);
+
+		this.executor = Executors.newFixedThreadPool(4);
 	}
 	
 	/**
@@ -244,7 +251,9 @@ class FramebufferUpdater implements Runnable {
 
 		this.running = true;
 		this.latch.countDown();
-		
+
+		long lastDelta = DELAY;
+
 		try {
 			
 			while (this.running == true) {				
@@ -253,15 +262,31 @@ class FramebufferUpdater implements Runnable {
 				// Wait for frame buffer update request message.
 				//
 				
-				final FramebufferUpdateRequest updateRequest = this.updateRequests.poll(DELAY, TimeUnit.MILLISECONDS);
+				final List<FramebufferUpdateRequest> incomingRequests = new ArrayList<>();
 
-				// Here be careful to check updateRequest object against null value,
-				//  since frame buffer updater thread is started in parallel with client handler thread.
-				if (updateRequest == null) {
-				
-					continue; // go back, and wait again for update request.
+				// Take one from the queue, and then drain the queue into the array list.
+				// This will ensure that the queue is empty.
+				// If the client starts flooding
+				// with the framebuffer update requests, ignore all but the last request.
+				incomingRequests.add(this.updateRequests.take());
+
+				this.updateRequests.drainTo(incomingRequests);
+
+				// Remove all null elements (if any).
+				incomingRequests.removeIf(Objects::isNull);
+
+				// Go back, and wait again for update request(s).
+				if (incomingRequests.size() == 0) {
+
+					TimeUnit.MILLISECONDS.sleep(DELAY);
+
+					continue;
 				}
-				
+
+				// Get that last update request. Previous requests are ignored.
+				// This prevents the flooding from the client side.
+				final FramebufferUpdateRequest updateRequest = incomingRequests.get(incomingRequests.size() - 1);
+
 				if (this.loadingState == true) {
 
 					//
@@ -290,19 +315,37 @@ class FramebufferUpdater implements Runnable {
 					//
 					// Now create new frame buffer update message, and write to socket.
 					//
-					
+
+					long startedAt = System.currentTimeMillis();
 					boolean updated = this.framebufferUpdate(updateRequest);
-				
+					long endedAt = System.currentTimeMillis();
+
+					long delta = endedAt - startedAt;
+
+					long delay = DELAY - delta;
+
 					// It might happen that method returns false, if screen image did not change.
 					if (updated == false) {
 					
 						// Put back frame buffer update request in queue.
 						// Take it again after DELAY time period.
 						this.updateRequests.put(updateRequest);
+
+						if (delay > 0) {
+
+							TimeUnit.MILLISECONDS.sleep(delay);
+						}
+						else {
+
+							if (Math.abs(delta - lastDelta) > DELAY) {
+
+								log.warn(String.format("Took %d msec. to process framebuffer update request.", delta));
+							}
+
+							lastDelta = delta;
+						}
 					}
-				}				
-						
-				TimeUnit.MILLISECONDS.sleep(DELAY);
+				}
 			}
 		}
 		catch (final Exception exception) {
@@ -420,10 +463,9 @@ class FramebufferUpdater implements Runnable {
 	 * 
 	 * @return	true if frame buffer was updated, or false if screen image did not change from last invocation
 	 * 
-	 * @throws IOException 
-	 * @throws AWTException 
+	 * @throws IOException if the network connection breaks
 	 */
-	private boolean framebufferUpdate(final FramebufferUpdateRequest updateRequest) throws IOException, AWTException {
+	private boolean framebufferUpdate(final FramebufferUpdateRequest updateRequest) throws IOException {
 
 		// Find suitable encoder for frame buffer update response.
 		final EncodingInterface encoder = selectEncoder();
@@ -442,9 +484,9 @@ class FramebufferUpdater implements Runnable {
 		// as list of tiles.
 		// Update only tiles that are different comparing to last invocation.
 		//
-		
+
 		final List<Tile> tiles = getChangedTiles();
-		
+
 		if (tiles.isEmpty() == true) {
 			
 			return false;
@@ -459,18 +501,49 @@ class FramebufferUpdater implements Runnable {
 		
 		dataOut.writeShort(numberOfRectangles);
 
+		// Store here the Future instances for each encoded tile.
+		final List<Future<ByteArrayOutputStream>> tasks = new ArrayList<>();
+		final CountDownLatch latch = new CountDownLatch(tiles.size());
 		for (final Tile tile : tiles) {
-			
-			dataOut.writeShort(tile.xPos);
-			dataOut.writeShort(tile.yPos);
-			dataOut.writeShort(tile.width);
-			dataOut.writeShort(tile.height);
-			dataOut.writeInt(encoder.getType());
-			
-			final byte[] encodedImage = encoder.encode(new TrueColorImage(tile.raw(), tile.width, tile.height), this.pixelFormat);
-			dataOut.write(encodedImage);
+
+			// Encode in another thread, each tile.
+			final Future<ByteArrayOutputStream> future = this.executor.submit( () -> {
+
+				final ByteArrayOutputStream bOut = new ByteArrayOutputStream();
+				final DataOutputStream dataOut0 = new DataOutputStream(bOut);
+
+				dataOut0.writeShort(tile.xPos);
+				dataOut0.writeShort(tile.yPos);
+				dataOut0.writeShort(tile.width);
+				dataOut0.writeShort(tile.height);
+				dataOut0.writeInt(encoder.getType());
+
+				final byte[] encodedImage = encoder.encode(new TrueColorImage(tile.raw(), tile.width, tile.height), this.pixelFormat);
+				dataOut0.write(encodedImage);
+
+				latch.countDown();
+
+				return bOut;
+			});
+
+			tasks.add(future);
 		}
-		
+
+		try {
+
+			// Wait for the all tasks / encoders to finish encoding.
+			latch.await();
+			for (final Future<ByteArrayOutputStream> future : tasks) {
+
+				// Write out to the RFB client the result.
+				final ByteArrayOutputStream bOut = future.get();
+				dataOut.write(bOut.toByteArray());
+			}
+		}
+		catch (final InterruptedException | ExecutionException ex) {
+			log.error(String.format("Interrupted while encoding." ), ex);
+		}
+
 		dataOut.flush();
 		
 		return true;
